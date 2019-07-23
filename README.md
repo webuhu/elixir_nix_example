@@ -17,7 +17,7 @@ The easiest way to get the app running is by the usage of [Nix](https://nixos.or
 - `nix-shell --pure -A testing --argstr environment test` - run tests
 
 ### Release commands
-- `nix-build --pure -A release --argstr environment prod` - build production release
+- `nix-build -A release --argstr environment prod` - build production release
 
 ### Maintenance commands
 - `nix-shell --pure -A pkgs_update` - update Nix packages

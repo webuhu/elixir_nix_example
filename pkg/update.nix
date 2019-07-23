@@ -2,7 +2,8 @@
 
 pkgs.mkShell {
   inherit LANG;
-  nativeBuildInputs = [elixir];
+  NIX_SSL_CERT_FILE = "/etc/ssl/certs/ca-certificates.crt";
+  nativeBuildInputs = [elixir pkgs.nix];
   shellHook = ''
     elixir pkg/scripts/pkgs_update.exs
     echo '--'

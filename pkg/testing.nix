@@ -1,7 +1,7 @@
-{ pkgs, elixir, hex, deps, build, MIX_ENV, MIX_REBAR3, LANG }:
+{ pkgs, elixir, hex, elixir_deps, elixir_build, MIX_ENV, MIX_REBAR3, LANG }:
 
 pkgs.mkShell {
-  inherit deps build MIX_ENV MIX_REBAR3 LANG;
+  inherit elixir_deps elixir_build MIX_ENV MIX_REBAR3 LANG;
   nativeBuildInputs = [elixir hex];
   shellHook = ''
     function cleanup() {
@@ -10,11 +10,11 @@ pkgs.mkShell {
     trap cleanup EXIT
 
     mkdir -p deps
-    cp -r $deps/. deps/
+    cp -r $elixir_deps/. deps/
     chmod -R 700 deps
 
     mkdir -p _build
-    cp -r $build/. _build/
+    cp -r $elixir_build/. _build/
     chmod -R 700 _build
 
     HOME=.

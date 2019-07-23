@@ -1,10 +1,10 @@
 defmodule PkgsUpdate do
   @moduledoc """
-  Updates the local pkg/_pkgs.nix file with the latest Nix package from Github.
+  Updates the local pkg/_pkgs.nix file with pin to the latest Nix packages on Github.
   """
 
   @nix_pkg_download_url "https://github.com/NixOS/nixpkgs-channels/archive"
-  @github_channel "nixos-unstable-small"
+  @github_channel "nixpkgs-unstable"
 
   @doc """
   Run the pkg/_pkgs.nix update generation.
@@ -79,7 +79,7 @@ defmodule PkgsUpdate do
     }) {}
     """
 
-    # overwrite dervation
+    # overwrite derivation
     File.write!("pkg/_pkgs.nix", update, [:write])
   end
 end

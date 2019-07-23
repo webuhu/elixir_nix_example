@@ -7,17 +7,17 @@
 The easiest way to get the app running is by the usage of [Nix](https://nixos.org/nix/download.html) on a *nix system.
 
 ### Development commands
-- `nix-shell -A development.run` - run app
-- `nix-shell -A development.watch` - start development watch mode
-- `nix-shell -A development.env` - enter shell w/ Elixir
-- `nix-shell -A development.iex` - enter IEx shell
+- `nix-shell --pure -A development.run` - run app
+- `nix-shell --pure -A development.watch` - start development watch mode
+- `nix-shell --pure -A development.env` - enter shell w/ Elixir
+- `nix-shell --pure -A development.iex` - enter IEx shell
 - `nix-build -A docs` - generate doc
 
 ### Testing
-- `nix-shell -A testing --argstr environment test` - run tests
+- `nix-shell --pure -A testing --argstr environment test` - run tests
 
 ### Release commands
-- `nix-build -A release --argstr environment prod` - build production release
+- `nix-build --pure -A release --argstr environment prod` - build production release
 
 ### Maintenance commands
-- `nix-shell -A pkgs_update` - update Nix packages
+- `nix-shell --pure -A pkgs_update` - update Nix packages

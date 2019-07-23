@@ -9,12 +9,12 @@ rec {
   MIX_REBAR3 = "${rebar3}/bin/rebar3";
   LANG = "C.UTF-8"; # deprecated when is set default in Nix
 
-  development = import ./pkg/development.nix { inherit pkgs elixir hex deps build MIX_ENV MIX_REBAR3 LANG; };
-  testing = import ./pkg/testing.nix { inherit pkgs elixir hex deps build MIX_ENV MIX_REBAR3 LANG; };
+  development = import ./pkg/development.nix { inherit pkgs elixir hex elixir_deps elixir_build MIX_ENV MIX_REBAR3 LANG; };
+  testing = import ./pkg/testing.nix { inherit pkgs elixir hex elixir_deps elixir_build MIX_ENV MIX_REBAR3 LANG; };
   pkgs_update = import ./pkg/update.nix { inherit pkgs elixir LANG; };
 
-  deps = pkgs.stdenv.mkDerivation rec {
-    name = "deps";
+  elixir_deps = pkgs.stdenv.mkDerivation rec {
+    name = "elixir_deps";
     mix_exs = ./mix.exs;
     mix_lock = ./mix.lock;
     inherit MIX_ENV LANG;
@@ -25,17 +25,18 @@ rec {
       ln -s $mix_exs mix.exs
       ln -s $mix_lock mix.lock
       HOME=.
+      mkdir -p deps
       mix deps.get
       mkdir $out
       cp -r ./deps/. $out/
     '';
   };
 
-  build = pkgs.stdenv.mkDerivation rec {
-    name = "build";
+  elixir_build = pkgs.stdenv.mkDerivation rec {
+    name = "elixir_build";
     mix_exs = ./mix.exs;
     mix_lock = ./mix.lock;
-    inherit deps MIX_ENV MIX_REBAR3 LANG;
+    inherit elixir_deps MIX_ENV MIX_REBAR3 LANG;
     nativeBuildInputs = [elixir hex];
     builder = builtins.toFile "builder.sh" ''
       source $stdenv/setup
@@ -44,7 +45,7 @@ rec {
       ln -s $mix_lock mix.lock
 
       mkdir -p deps
-      cp -r $deps/. deps/
+      cp -r $elixir_deps/. deps/
       chmod -R 700 deps
 
       HOME=.
@@ -59,7 +60,7 @@ rec {
     lib = ./lib;
     mix_exs = ./mix.exs;
     mix_lock = ./mix.lock;
-    inherit deps build MIX_ENV MIX_REBAR3 LANG;
+    inherit elixir_deps elixir_build MIX_ENV MIX_REBAR3 LANG;
     nativeBuildInputs = [elixir hex];
     builder = builtins.toFile "builder.sh" ''
       source $stdenv/setup
@@ -69,11 +70,11 @@ rec {
       ln -s $mix_lock mix.lock
 
       mkdir -p deps
-      cp -r $deps/. deps/
+      cp -r $elixir_deps/. deps/
       chmod -R 700 deps
 
       mkdir -p _build
-      cp -r $build/. _build/
+      cp -r $elixir_build/. _build/
       chmod -R 700 _build
 
       HOME=.
@@ -90,7 +91,7 @@ rec {
     mix_exs = ./mix.exs;
     mix_lock = ./mix.lock;
 
-    inherit deps build MIX_ENV MIX_REBAR3 LANG;
+    inherit elixir_deps elixir_build MIX_ENV MIX_REBAR3 LANG;
     nativeBuildInputs = [elixir hex];
     builder = builtins.toFile "builder.sh" ''
       source $stdenv/setup
@@ -100,11 +101,11 @@ rec {
       ln -s $mix_lock mix.lock
 
       mkdir -p deps
-      cp -r $deps/. deps/
+      cp -r $elixir_deps/. deps/
       chmod -R 700 deps
 
       mkdir -p _build
-      cp -r $build/. _build/
+      cp -r $elixir_build/. _build/
       chmod -R 700 _build
 
       HOME=.

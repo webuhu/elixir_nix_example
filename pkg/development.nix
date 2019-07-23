@@ -1,4 +1,4 @@
-{ pkgs, elixir, hex, deps, build, MIX_ENV, MIX_REBAR3, LANG }:
+{ pkgs, elixir, hex, elixir_deps, elixir_build, MIX_ENV, MIX_REBAR3, LANG }:
 
 rec {
   watchexec = pkgs.watchexec;
@@ -15,16 +15,16 @@ rec {
     trap cleanup EXIT
 
     mkdir -p deps
-    cp -r $deps/. deps/
+    cp -r $elixir_deps/. deps/
     chmod -R 700 deps
 
     mkdir -p _build
-    cp -r $build/. _build/
+    cp -r $elixir_build/. _build/
     chmod -R 700 _build
   '';
 
   env = pkgs.mkShell {
-    inherit deps build MIX_ENV MIX_REBAR3 LANG;
+    inherit elixir_deps elixir_build MIX_ENV MIX_REBAR3 LANG;
     nativeBuildInputs = [elixir];
     shellHook = ''
       ${common_script}
@@ -32,7 +32,7 @@ rec {
   };
 
   run = pkgs.mkShell {
-    inherit deps build MIX_ENV MIX_REBAR3 LANG;
+    inherit elixir_deps elixir_build MIX_ENV MIX_REBAR3 LANG;
     nativeBuildInputs = [elixir hex];
     shellHook = ''
       ${common_script}
@@ -42,7 +42,7 @@ rec {
   };
 
   watch = pkgs.mkShell {
-    inherit deps build MIX_ENV MIX_REBAR3 LANG;
+    inherit elixir_deps elixir_build MIX_ENV MIX_REBAR3 LANG;
     nativeBuildInputs = [elixir hex watchexec];
     shellHook = ''
       ${common_script}
@@ -52,7 +52,7 @@ rec {
   };
 
   iex = pkgs.mkShell {
-    inherit deps build MIX_ENV MIX_REBAR3 LANG;
+    inherit elixir_deps elixir_build MIX_ENV MIX_REBAR3 LANG;
     nativeBuildInputs = [elixir hex];
     shellHook = ''
       ${common_script}
@@ -61,9 +61,9 @@ rec {
     '';
   };
 
-  phx_server = pkgs.mkShellc {
-    inherit deps build MIX_ENV MIX_REBAR3 LANG;
-    nativeBuildInputs = [locale elixir hex pkgs.postgresql100];
+  phx_server = pkgs.mkShell {
+    inherit elixir_deps elixir_build MIX_ENV MIX_REBAR3 LANG;
+    nativeBuildInputs = [elixir hex pkgs.postgresql_11];
     shellHook = ''
       function cleanup() {
         pg_ctl stop
@@ -73,20 +73,20 @@ rec {
       trap cleanup EXIT
 
       mkdir -p deps
-      cp -r $deps/. deps/
+      cp -r $elixir_deps/. deps/
       chmod -R 700 deps
 
       mkdir -p _build
-      cp -r $build/. _build/
+      cp -r $elixir_build/. _build/
       chmod -R 700 _build
 
       HOME=.
       export PGDATA=.postgres
       initdb
       pg_ctl start
-      createdb playscience_api_dev
+      createdb database_name
 
-      psql playscience_api_dev -c "CREATE USER postgres WITH PASSWORD 'postgres';"
+      psql database_name -c "CREATE USER postgres WITH PASSWORD 'postgres';"
 
       mix ecto.migrate
       mix phx.server

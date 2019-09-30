@@ -2,22 +2,100 @@
 
 > Simple seed to show off how I use Nix as build environment for Elixir projects.
 
-## Getting started
+## Setup
 
-The easiest way to get the app running is by the usage of [Nix](https://nixos.org/nix/download.html) on a *nix system.
+This repo provides a quick & easy setup by the usage of [Nix](https://nixos.org/nix/about.html).  
+Nix currently runs on **Linux** and **macOS**.
 
-### Development commands
-- `nix-shell --pure -A development.run` - run app
-- `nix-shell --pure -A development.watch` - start development watch mode
-- `nix-shell --pure -A development.env` - enter shell w/ Elixir
-- `nix-shell --pure -A development.iex` - enter IEx shell
-- `nix-build -A docs` - generate doc
+- [Getting Nix](https://nixos.org/nix/download.html)
 
-### Testing
-- `nix-shell --pure -A testing --argstr environment test` - run tests
+By using the Nix setup, beside Nix nothing else needs to be manually installed in advance.
 
-### Release commands
-- `nix-build -A release --argstr environment prod` - build production release
+**Windows Users**  
+We recommended to run the setup within a Linux Virtual Machine or using WSL 2, also using Nix.
 
-### Maintenance commands
-- `nix-shell --pure -A pkgs_update` - update Nix packages
+### Manual Setup
+
+We don't provide an instruction for manual setup - for maintaining simplicity.  
+We just list the required dependencies here:
+
+- [Elixir](https://elixir-lang.org) (& [Erlang](https://www.erlang.org))
+- [PostgreSQL](https://www.postgresql.org)
+
+## Development
+
+> For convenience there exists an alias configuration for the following shell commands.  
+> Go to: [Aliases](#aliases)
+
+### Environment
+
+```sh
+# Elixir Setup (get deps & compile)
+# Necessary before running most of the following commands,
+# as `mix deps.get` is seen as an impure fetch
+# Alias: `app-setup`
+nix-build -A elixir_prepare --option sandbox relaxed
+
+# Enter shell w/ development environment
+# Alias: `app-env`
+nix-shell --pure -A dev.env
+
+# Run app
+# Alias: `app-run`
+nix-shell --pure -A dev.env --run 'mix run --no-halt'
+
+# Enter IEx (Elixir's interactive shell)
+# Alias: `app-iex`
+nix-shell --pure -A dev.env --run 'iex -S mix'
+
+# Start development watch mode
+# Alias: `app-watch`
+nix-shell --pure -A dev.watch
+```
+
+### Test
+
+```sh
+# Running all tests
+# Alias: `app-test`
+nix-shell --pure -A dev.env --argstr environment test --run 'mix test'
+```
+
+### Docs
+
+```sh
+# Generate docs using `mix docs`
+nix-build -A docs.build
+```
+
+### Release
+
+```sh
+# Build procution release using `mix release`
+nix-build -A release --argstr environment prod
+```
+
+### Maintenance
+
+```sh
+# Update pinned Nix packages
+nix-shell --pure -A pkgs_update
+```
+
+## Aliases
+
+```sh
+# Load the aliases into your shell
+. pkg/scripts/alias.sh
+```
+**Working with aliases**
+```sh
+# List
+alias
+
+# Remove
+unalias alias_name
+
+# Remove all
+unalias -a
+```

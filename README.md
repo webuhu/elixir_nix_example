@@ -72,7 +72,7 @@ nix-build -A docs.build
 
 ```sh
 # Build procution release using `mix release`
-nix-build -A release --argstr environment prod
+nix-build -A release --argstr environment prod --argstr release_name seed
 ```
 
 ### Maintenance

@@ -1,4 +1,4 @@
-{ pkgs ? import ./pkg/_pkgs.nix, environment ? "dev" }:
+{ pkgs ? import ./pkg/_pkgs.nix, environment ? "dev", release_name ? "seed" }:
 
 rec {
   elixir = pkgs.buildPackages.beam.packages.erlangR22.elixir_1_9;
@@ -63,6 +63,7 @@ rec {
     lib = ./lib;
     mix_exs = ./mix.exs;
     mix_lock = ./mix.lock;
+    RELEASE_NAME = "${release_name}";
     inherit elixir_prepare MIX_ENV MIX_REBAR3 LANG;
     nativeBuildInputs = [elixir hex];
     builder = builtins.toFile "builder.sh" ''
@@ -76,10 +77,8 @@ rec {
       ${elixir_import_build}
 
       HOME=.
-      mix release
-
       mkdir $out
-      cp -r _build/${MIX_ENV}/rel/seed/. $out/
+      mix release $RELEASE_NAME --path $out --quiet
     '';
   };
 }

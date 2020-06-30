@@ -1,15 +1,16 @@
-{ pkgs ? import ./pkg/_pkgs.nix, environment ? "dev", release_name ? "seed" }:
+{ pkgs ? import ./pkg/_pkgs.nix, env ? "dev", release_name ? "seed" }:
 
 rec {
-  elixir = pkgs.buildPackages.beam.packages.erlangR22.elixir_1_9;
+  elixir = pkgs.buildPackages.beam.packages.erlangR22.elixir_1_10;
+
   hex = pkgs.buildPackages.beam.packages.erlangR22.hex;
   rebar3 = pkgs.buildPackages.beam.packages.erlangR22.rebar3;
 
-  postgresql = pkgs.postgresql_11;
+  postgresql = pkgs.postgresql_12;
 
-  MIX_ENV = "${environment}";
+  MIX_ENV = "${env}";
   MIX_REBAR3 = "${rebar3}/bin/rebar3";
-  LANG = "C.UTF-8"; # redundant with [Patch](https://github.com/NixOS/nixpkgs/pull/61202)
+  LANG = "C.UTF-8";
 
   dev = import ./pkg/development.nix { inherit pkgs elixir hex postgresql elixir_prepare MIX_ENV MIX_REBAR3 LANG; };
   docs = import ./pkg/docs.nix { inherit pkgs elixir hex elixir_prepare MIX_ENV MIX_REBAR3 LANG; };
@@ -33,13 +34,13 @@ rec {
     name = "elixir_prepare";
     mix_exs = ./mix.exs;
     mix_lock = ./mix.lock;
-    FIXED_ERL_LIBS = "${hex}/lib/erlang/lib";
+    CLEANED_ERL_LIBS = "${hex}/lib/erlang/lib";
     inherit MIX_ENV MIX_REBAR3 LANG;
     nativeBuildInputs = [elixir hex];
     builder = builtins.toFile "builder.sh" ''
       source $stdenv/setup
 
-      export ERL_LIBS=$FIXED_ERL_LIBS
+      export ERL_LIBS=$CLEANED_ERL_LIBS
 
       export HEX_HOME=$PWD/.hex
       export MIX_HOME=$PWD/.mix

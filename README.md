@@ -9,23 +9,22 @@ Nix currently runs on **Linux** and **macOS**.
 
 - [Getting Nix](https://nixos.org/nix/download.html)
 
-By using the Nix setup, beside Nix nothing else needs to be manually installed in advance.
+By using Nix, beside Nix nothing else needs to be manually installed.
 
 **Windows Users**  
-We recommended to run the setup within a Linux Virtual Machine or using WSL 2, also using Nix.
+Recommended to run the setup within a Linux Virtual Machine or using WSL 2, also using Nix.
 
 ### Manual Setup
 
-We don't provide an instruction for manual setup - for maintaining simplicity.  
-We just list the required dependencies here:
+For maintaining simplicity, instructions for a manual setup isn't part of the documentation.  
+Anyway, list of the required dependencies:
 
 - [Elixir](https://elixir-lang.org) (& [Erlang](https://www.erlang.org))
 - [PostgreSQL](https://www.postgresql.org)
 
 ## Development
 
-> For convenience there exists an alias configuration for the following shell commands.  
-> Go to: [Aliases](#aliases)
+> For convenience an [alias configuration](#aliases) exists for most of the following shell commands.
 
 ### Environment
 
@@ -86,6 +85,7 @@ nix-shell --pure -A pkgs_update
 
 ```sh
 # Load the aliases into your shell
+# You could also source this in your .profile
 . pkg/scripts/alias.sh
 ```
 **Working with aliases**
@@ -98,4 +98,18 @@ unalias alias_name
 
 # Remove all
 unalias -a
+```
+
+## [direnv](https://direnv.net/)
+
+`direnv` let's you automatically load environment variables per directory defined in `.envrc`.
+
+**Working with direnv**
+```sh
+# Install via Nix
+nix-env -iA nixpkgs.direnv
+
+# Setup hook
+# Add the following to your .profile
+eval "$(direnv hook bash)"
 ```

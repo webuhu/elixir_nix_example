@@ -28,7 +28,7 @@ rec {
     ${elixir_import_deps}
     ${elixir_import_build}
 
-    mix ecto.migrate
+    mix ecto.migrate --quiet
     # mix phx.server
 
     cleanup_elixir() {
@@ -39,24 +39,26 @@ rec {
   '';
 
   postgresql_setup = ''
-    mkdir -p .nix-shell
-    export NIX_SHELL_DIR=$PWD/.nix-shell
+    export PGDATA=$(mktemp --directory)
 
-    mkdir -p $NIX_SHELL_DIR/.postgresql
-    export PGDATA=$NIX_SHELL_DIR/.postgresql
+    # PG_LISTENING_ADDRESS default to localhost
+    : ''${PG_LISTENING_ADDRESS:=127.0.0.1}
 
     initdb --locale=C --encoding=UTF8 --auth-local=peer --auth-host=scram-sha-256 > /dev/null || exit
 
     # set -m fixes ^C kill postgresql
     set -m
     # get options for -o from: `postgres --help`
-    pg_ctl -l $PGDATA/postgresql.log -o "-k $PGDATA" start || exit
+    pg_ctl -l $PGDATA/postgresql.log -o "-k $PGDATA" -h $PG_LISTENING_ADDRESS" start || exit
 
-    createdb -h $PGDATA simplicity
-    psql -h $PGDATA simplicity -c "CREATE EXTENSION IF NOT EXISTS postgis;" > /dev/null
+    createdb -h $PGDATA database_name
+    psql -h $PGDATA database_name -c "COMMENT ON DATABASE sici_dev IS 'Database for Development, Testing & CI'" > /dev/null
 
     # createuser postgres --createdb
-    psql -h $PGDATA simplicity -c "CREATE USER postgres WITH CREATEDB PASSWORD 'postgres';" > /dev/null
+    if [ $MIX_ENV = 'dev' ]
+    then
+      psql -h $PGDATA database_name -c "CREATE USER dev PASSWORD 'secret'" > /dev/null
+    fi
 
     cleanup_postgres() {
       echo 'cleanup postgres ...'
@@ -69,8 +71,18 @@ rec {
   env = pkgs.mkShell {
     inherit elixir_prepare MIX_ENV MIX_REBAR3 LANG;
     inherit ERL_AFLAGS;
+    CLEANED_ERL_LIBS = "${hex}/lib/erlang/lib";
     nativeBuildInputs = [elixir hex postgresql pkgs.less];
     shellHook = ''
+      export ERL_LIBS=$CLEANED_ERL_LIBS
+
+      # DB only listening on socket - no TCP.
+      # Necessary to run tests concurrently.
+      if [ $MIX_ENV = 'test' ]
+      then
+        export PG_LISTENING_ADDRESS="'''"
+      fi
+
       ${shell_setup}
       ${postgresql_setup}
       ${elixir_setup}
@@ -85,8 +97,11 @@ rec {
 
   watch = pkgs.mkShell {
     inherit elixir_prepare MIX_ENV MIX_REBAR3 LANG;
+    CLEANED_ERL_LIBS = "${hex}/lib/erlang/lib";
     nativeBuildInputs = [elixir hex postgresql watchexec];
     shellHook = ''
+      export ERL_LIBS=$CLEANED_ERL_LIBS
+
       ${shell_setup}
       ${postgresql_setup}
       ${elixir_setup}
@@ -101,3 +116,4 @@ rec {
       watchexec --exts ex --restart "mix run --no-halt &"
     '';
   };
+}

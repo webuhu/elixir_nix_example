@@ -49,7 +49,7 @@ rec {
     # set -m fixes ^C kill postgresql
     set -m
     # get options for -o from: `postgres --help`
-    pg_ctl -l $PGDATA/postgresql.log -o "-k $PGDATA" -h $PG_LISTENING_ADDRESS" start || exit
+    pg_ctl -l $PGDATA/postgresql.log -o "-k $PGDATA -h $PG_LISTENING_ADDRESS" start || exit
 
     createdb -h $PGDATA database_name
     psql -h $PGDATA database_name -c "COMMENT ON DATABASE sici_dev IS 'Database for Development, Testing & CI'" > /dev/null

@@ -4,23 +4,24 @@
 
 ## Setup
 
-This repo provides a quick & easy setup by the usage of [Nix](https://nixos.org/nix/about.html).  
+This repo provides a quick & easy setup by the usage of [Nix](https://nixos.org).  
 Nix currently runs on **Linux** and **macOS**.
 
-- [Getting Nix](https://nixos.org/nix/download.html)
+- [Getting Nix](https://nixos.org/download.html)
 
 By using Nix, beside Nix nothing else needs to be manually installed.
 
 **Windows Users**  
-Recommended to run the setup within a Linux Virtual Machine or using WSL 2, also using Nix.
+Recommended to run the setup, also using Nix, within a Linux Virtual Machine or using WSL 2.
 
 ### Manual Setup
 
 For maintaining simplicity, instructions for a manual setup isn't part of the documentation.  
-Anyway, list of the required dependencies:
+Anyway, required dependencies:
 
 - [Elixir](https://elixir-lang.org) (& [Erlang](https://www.erlang.org))
 - [PostgreSQL](https://www.postgresql.org)
+- [Node.js](https://nodejs.org)
 
 ## Development
 
@@ -78,7 +79,22 @@ nix-build -A release --argstr environment prod --argstr release_name seed
 
 ```sh
 # Update pinned Nix packages
-nix-shell --pure -A pkgs_update
+elixir pkg/scripts/pkgs_update.exs
+
+# Check outdated deps
+mix hex.outdated
+
+# Update deps
+mix deps.update --all
+
+# Removed unused deps from mix.lock
+mix deps.clean --unlock --unused
+
+# Check outdated npm packages
+npm outdated --prefix assets
+
+# Update npm packages
+npm update --prefix assets
 ```
 
 ## Aliases

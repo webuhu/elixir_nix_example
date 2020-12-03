@@ -3,8 +3,8 @@ defmodule PkgsUpdate do
   Updates the local pkg/_pkgs.nix file with pin to the latest Nix packages on Github.
   """
 
-  @nix_pkg_download_url "https://github.com/NixOS/nixpkgs-channels/archive"
-  @github_channel "nixpkgs-unstable"
+  @nix_pkg_download_url "https://github.com/NixOS/nixpkgs/archive"
+  @github_channel "nixos-unstable-small"
 
   @doc """
   Run the pkg/_pkgs.nix update generation.
@@ -14,12 +14,13 @@ defmodule PkgsUpdate do
       github_api_request(github_api_url())
       |> get_latest_commit_sha()
 
-    pkg_sha = get_nix_pkg_sha(commit_sha)
-    write_pkgs_file(commit_sha, pkg_sha)
+    write_pkgs_file(commit_sha)
+
+    IO.puts(IO.ANSI.format([:green, "Done."]))
   end
 
   defp github_api_url() do
-    "https://api.github.com/repos/NixOS/nixpkgs-channels/commits?sha=#{@github_channel}"
+    "https://api.github.com/repos/NixOS/nixpkgs/commits?sha=#{@github_channel}"
   end
 
   @spec github_api_request(binary()) :: charlist()
@@ -58,15 +59,8 @@ defmodule PkgsUpdate do
     List.first(commit_sha_list)
   end
 
-  @spec get_nix_pkg_sha(binary()) :: binary()
-  defp get_nix_pkg_sha(commit_sha) do
-    nix_pkg_url = @nix_pkg_download_url <> "/#{commit_sha}.tar.gz"
-    {pkg_sha, _} = System.cmd("nix-prefetch-url", ["--unpack", nix_pkg_url])
-    String.trim_trailing(pkg_sha)
-  end
-
-  @spec write_pkgs_file(binary(), binary()) :: :ok
-  defp write_pkgs_file(commit_sha, pkg_sha) do
+  @spec write_pkgs_file(binary()) :: :ok
+  defp write_pkgs_file(commit_sha) do
     date = Date.utc_today()
 
     # nix derivation
@@ -75,7 +69,6 @@ defmodule PkgsUpdate do
     import(fetchTarball {
       name = "#{@github_channel}_#{date}";
       url = "#{@nix_pkg_download_url}/#{commit_sha}.tar.gz";
-      sha256 = "#{pkg_sha}";
     }) {}
     """
 

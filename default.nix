@@ -1,10 +1,10 @@
 { pkgs ? import ./pkg/_pkgs.nix, env ? "dev", release_name ? "seed" }:
 
 rec {
-  elixir = pkgs.buildPackages.beam.packages.erlangR22.elixir_1_10;
+  elixir = pkgs.buildPackages.beam.packages.erlangR23.elixir_1_11;
 
-  hex = pkgs.buildPackages.beam.packages.erlangR22.hex;
-  rebar3 = pkgs.buildPackages.beam.packages.erlangR22.rebar3;
+  hex = pkgs.buildPackages.beam.packages.erlangR23.hex;
+  rebar3 = pkgs.buildPackages.beam.packages.erlangR23.rebar3;
 
   postgresql = pkgs.postgresql_12;
 
@@ -14,7 +14,6 @@ rec {
 
   dev = import ./pkg/development.nix { inherit pkgs elixir hex postgresql elixir_prepare MIX_ENV MIX_REBAR3 LANG; };
   docs = import ./pkg/docs.nix { inherit pkgs elixir hex elixir_prepare MIX_ENV MIX_REBAR3 LANG; };
-  pkgs_update = import ./pkg/update.nix { inherit pkgs elixir LANG; };
 
   elixir_import_deps = ''
     mkdir -p deps

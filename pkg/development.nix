@@ -1,28 +1,9 @@
+# old setup
+# decide if watchexc is still useful
 { pkgs, elixir, hex, postgresql, elixir_prepare, MIX_ENV, MIX_REBAR3, LANG }:
 
 rec {
   watchexec = pkgs.watchexec;
-
-  nix_shell_prompt_override = ''
-    export PS1='\e[0;32m[nix-shell@\h] \W>\e[m '
-  '';
-
-  shell_setup = nix_shell_prompt_override;
-
-  # enable IEx shell history
-  ERL_AFLAGS = "-kernel shell_history enabled";
-
-  elixir_import_deps = ''
-    mkdir -p deps
-    cp -r $elixir_prepare/deps/. deps/
-    chmod -R 700 deps
-  '';
-
-  elixir_import_build = ''
-    mkdir -p _build
-    cp -r $elixir_prepare/_build/. _build/
-    chmod -R 700 _build
-  '';
 
   elixir_setup = ''
     ${elixir_import_deps}
@@ -49,10 +30,10 @@ rec {
     # set -m fixes ^C kill postgresql
     set -m
     # get options for -o from: `postgres --help`
-    pg_ctl -l $PGDATA/postgresql.log -o "-k $PGDATA" -h $PG_LISTENING_ADDRESS" start || exit
+    pg_ctl -l $PGDATA/postgresql.log -o "-k $PGDATA -h $PG_LISTENING_ADDRESS" start || exit
 
     createdb -h $PGDATA database_name
-    psql -h $PGDATA database_name -c "COMMENT ON DATABASE sici_dev IS 'Database for Development, Testing & CI'" > /dev/null
+    psql -h $PGDATA database_name -c "COMMENT ON DATABASE elixir_nix_example_dev IS 'Database for Development, Testing & CI'" > /dev/null
 
     # createuser postgres --createdb
     if [ $MIX_ENV = 'dev' ]

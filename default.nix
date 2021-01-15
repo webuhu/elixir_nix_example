@@ -1,84 +1,138 @@
-{ pkgs ? import ./pkg/_pkgs.nix, env ? "dev", release_name ? "seed" }:
+{ pkgs ? import ./pkg/_pkgs.nix, env ? "dev", release_name ? "example" }:
 
 rec {
-  elixir = pkgs.buildPackages.beam.packages.erlangR23.elixir_1_11;
+  erlang = pkgs.erlangR23;
+  elixir = pkgs.buildPackages.beam.packages.erlangR23.elixir;
+  nodejs = pkgs.nodejs-15_x;
 
-  hex = pkgs.buildPackages.beam.packages.erlangR23.hex;
-  rebar3 = pkgs.buildPackages.beam.packages.erlangR23.rebar3;
+  postgresql = pkgs.postgresql_13;
 
-  postgresql = pkgs.postgresql_12;
-
-  MIX_ENV = "${env}";
+  MIX_HOME = hex;
   MIX_REBAR3 = "${rebar3}/bin/rebar3";
   LANG = "C.UTF-8";
 
-  dev = import ./pkg/development.nix { inherit pkgs elixir hex postgresql elixir_prepare MIX_ENV MIX_REBAR3 LANG; };
-  docs = import ./pkg/docs.nix { inherit pkgs elixir hex elixir_prepare MIX_ENV MIX_REBAR3 LANG; };
-
-  elixir_import_deps = ''
-    mkdir -p deps
-    cp -r $elixir_prepare/deps/. deps/
-    chmod -R 700 deps
-  '';
-
-  elixir_import_build = ''
-    mkdir -p _build
-    cp -r $elixir_prepare/_build/. _build/
-    chmod -R 700 _build
-  '';
-
-  # needs `--option sandbox relaxed` (impure fetch)
-  elixir_prepare = pkgs.stdenv.mkDerivation rec {
-    __noChroot = true;
-    name = "elixir_prepare";
-    mix_exs = ./mix.exs;
-    mix_lock = ./mix.lock;
-    CLEANED_ERL_LIBS = "${hex}/lib/erlang/lib";
-    inherit MIX_ENV MIX_REBAR3 LANG;
-    nativeBuildInputs = [elixir hex];
-    builder = builtins.toFile "builder.sh" ''
-      source $stdenv/setup
-
-      export ERL_LIBS=$CLEANED_ERL_LIBS
-
-      export HEX_HOME=$PWD/.hex
-      export MIX_HOME=$PWD/.mix
-      export MIX_ARCHIVES=$MIX_HOME/archives
-
-      ln -s $mix_exs mix.exs
-      ln -s $mix_lock mix.lock
-
-      mix deps.get
-      mix compile
-
-      mkdir $out
-      cp -r ./_build/. $out/_build/
-      cp -r ./deps/. $out/deps/
-    '';
+  mix_deps = pkgs.callPackage ./pkg/mix_deps.nix {
+    inherit elixir MIX_HOME MIX_REBAR3 LANG;
   };
 
-  release = pkgs.stdenv.mkDerivation rec {
-    name = "release";
-    config = ./config;
-    lib = ./lib;
-    mix_exs = ./mix.exs;
-    mix_lock = ./mix.lock;
-    RELEASE_NAME = "${release_name}";
-    inherit elixir_prepare MIX_ENV MIX_REBAR3 LANG;
-    nativeBuildInputs = [elixir hex];
-    builder = builtins.toFile "builder.sh" ''
-      source $stdenv/setup
-      ln -s $config config
-      ln -s $lib lib
-      ln -s $mix_exs mix.exs
-      ln -s $mix_lock mix.lock
+  # mix_build = pkgs.callPackage ./pkg/mix_build.nix {
+  #   inherit elixir MIX_HOME MIX_REBAR3 mix_deps LANG;
+  # };
 
-      ${elixir_import_deps}
-      ${elixir_import_build}
+  node_modules = pkgs.callPackage ./pkg/node_modules.nix {
+    inherit nodejs;
+  };
 
-      HOME=.
-      mkdir $out
-      mix release $RELEASE_NAME --path $out --quiet
+  hex = pkgs.callPackage ./pkg/hex.nix {
+    inherit elixir LANG;
+  };
+
+  rebar3 = pkgs.callPackage ./pkg/rebar3.nix {
+    inherit erlang;
+  };
+
+  # Add docs to mix.exs first
+  # docs = pkgs.callPackage ./pkg/docs.nix {
+  #   inherit elixir mix_deps MIX_HOME MIX_REBAR3 LANG;
+  # };
+
+  base_hooks = ''
+    # short default prompt
+    export PS1='\e[0;32m[nix-shell@\h] \W>\e[m '
+  '';
+  elixir_hooks = ''
+    # enable IEx shell history
+    export ERL_AFLAGS="-kernel shell_history enabled"
+
+    # fix double paths in ERL_LIBS due to Nix
+    unset ERL_LIBS
+  '';
+  cleanup_elixir = ''
+    cleanup_elixir() {
+      echo 'cleanup elixir ...'
+
+      rm -rf deps _build
+    }
+  '';
+  hooks = base_hooks + elixir_hooks;
+
+  env_plain = pkgs.mkShell {
+    name = "env_plain";
+    inherit MIX_HOME MIX_REBAR3 LANG;
+    buildInputs = [
+      elixir
+      nodejs
+      pkgs.inotify-tools
+    ];
+    shellHook = hooks;
+  };
+
+  # to be used when MIX_ENV is integrated again
+  # fix_db_listening_in_test = ''
+  #   # DB only listening on socket - no TCP.
+  #   # Necessary to run tests concurrently.
+  #   if [ $MIX_ENV = 'test' ]
+  #   then
+  #     export PG_LISTENING_ADDRESS="'''"
+  #   fi
+  # ''
+
+  # TODO: database name to variable ...
+  postgresql_setup = ''
+    export PGDATA=$(mktemp --directory)
+
+    # PG_LISTENING_ADDRESS default to localhost
+    # TODO: Check that!
+    # : ''${PG_LISTENING_ADDRESS:=127.0.0.1}
+    PG_LISTENING_ADDRESS='127.0.0.1'
+
+    initdb --locale=C --encoding=UTF8 --auth-local=peer --auth-host=scram-sha-256 > /dev/null || exit
+
+    # set -m fixes ^C kill postgresql
+    set -m
+    # get options for -o from: `postgres --help`
+    pg_ctl -l $PGDATA/postgresql.log -o "-k $PGDATA -h $PG_LISTENING_ADDRESS" start || exit
+
+    createdb -h $PGDATA elixir_nix_example_dev
+    psql -h $PGDATA elixir_nix_example_dev -c "COMMENT ON DATABASE elixir_nix_example_dev IS 'Database for Development, Testing & CI'" > /dev/null
+
+    # createuser postgres --createdb
+    # if [ $MIX_ENV = 'dev' ]
+    # then
+    #   psql -h $PGDATA elixir_nix_example_dev -c "CREATE USER dev PASSWORD 'secret'" > /dev/null
+    # fi
+
+    cleanup_postgres() {
+      echo 'cleanup postgres ...'
+
+      pg_ctl stop --silent
+      rm -rf $NIX_SHELL_DIR/.postgresql
+    }
+  '';
+
+  env_full = pkgs.mkShell {
+    name = "env_full";
+    inherit MIX_HOME MIX_REBAR3 mix_deps LANG;
+    buildInputs = [
+      elixir
+      nodejs
+      pkgs.inotify-tools
+      postgresql
+    ];
+    shellHook = hooks + postgresql_setup + ''
+      ln -s $mix_deps deps
+
+      cleanup_elixir() {
+        echo 'cleanup elixir ...'
+
+        rm -rf deps _build
+      }
+
+      cleanup_all() {
+        cleanup_elixir
+        cleanup_postgres
+      }
+      trap cleanup_all EXIT
     '';
   };
 }

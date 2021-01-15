@@ -1,6 +1,9 @@
 # Elixir (Phoenix) Nix Example
 
-> Simple example repo to show off how I use Nix as build environment for Elixir projects.
+> Example repo to show off how I use Nix as build environment for Elixir / Phoenix projects.  
+> Important Nix stuff is located within `default.nix` & `pkg/` folder.
+
+> ALERT! Currently this is a lot of work in progress!
 
 ## Setup
 
@@ -9,9 +12,9 @@ Nix currently runs on **Linux** and **macOS**.
 
 - [Getting Nix](https://nixos.org/download.html)
 
-By using Nix, beside Nix nothing else needs to be manually installed.
+By using Nix, beside Nix nothing else needs to be installed manually.
 
-**Windows Users**  
+**Windows**  
 Recommended to run the setup, also using Nix, within a Linux Virtual Machine or using WSL 2.
 
 ### Manual Setup
@@ -27,6 +30,25 @@ Anyway, required dependencies:
 
 > For convenience an [alias configuration](#aliases) exists for most of the following shell commands.
 
+### Basics
+
+```sh
+# Get mix deps
+mix deps.get
+
+# Start Phoenix server
+mix phx.server
+
+# Start application
+mix run --no-halt
+
+# Enter IEx
+iex -S mix
+
+# JS
+npm install --prefix assets
+```
+
 ### Environment
 
 ```sh
@@ -36,21 +58,15 @@ Anyway, required dependencies:
 # Alias: `app-setup`
 nix-build -A elixir_prepare --option sandbox relaxed
 
-# Enter shell w/ development environment
+# Enter shell w/ plain development environment
 # Alias: `app-env`
-nix-shell --pure -A dev.env
+nix-shell --pure -A env_plain
 
-# Run app
-# Alias: `app-run`
-nix-shell --pure -A dev.env --run 'mix run --no-halt'
+# Run basic commands without shell
+nix-shell --pure -A env_plain --run '<command>'
 
-# Enter IEx (Elixir's interactive shell)
-# Alias: `app-iex`
-nix-shell --pure -A dev.env --run 'iex -S mix'
-
-# Start development watch mode
-# Alias: `app-watch`
-nix-shell --pure -A dev.watch
+# Enter shell w/ full development environment (inkl. Database)
+nix-shell --pure -A env_full
 ```
 
 ### Test
@@ -58,14 +74,14 @@ nix-shell --pure -A dev.watch
 ```sh
 # Running all tests
 # Alias: `app-test`
-nix-shell --pure -A dev.env --argstr environment test --run 'mix test'
+# nix-shell --pure -A dev.env_full --argstr environment test --run 'mix test'
 ```
 
 ### Docs
 
 ```sh
 # Generate docs using `mix docs`
-nix-build -A docs.build
+# nix-build -A docs
 ```
 
 ### Release
@@ -78,7 +94,7 @@ nix-build -A release --argstr environment prod --argstr release_name seed
 ### Maintenance
 
 ```sh
-# Update pinned Nix packages
+# Update pinned Nix pkgs
 elixir pkg/scripts/pkgs_update.exs
 
 # Check outdated deps
@@ -86,8 +102,10 @@ mix hex.outdated
 
 # Update deps
 mix deps.update --all
+# + npm update ... (phx)
+# needs mix_deps hash update
 
-# Removed unused deps from mix.lock
+# Removed unused deps
 mix deps.clean --unlock --unused
 
 # Check outdated npm packages

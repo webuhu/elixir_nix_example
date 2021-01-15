@@ -1,6 +1,6 @@
-# Seed
+# Elixir (Phoenix) Nix Example
 
-> Simple seed to show off how I use Nix as build environment for Elixir projects.
+> Simple example repo to show off how I use Nix as build environment for Elixir projects.
 
 ## Setup
 

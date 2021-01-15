@@ -1,6 +1,10 @@
-/_build
-/cover
-/deps
-/doc
+/_build/
+/assets/node_modules/
+/cover/
+/deps/
+/doc/
+/secrets/
 
 erl_crash.dump
+
+/priv/static/

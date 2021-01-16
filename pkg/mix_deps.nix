@@ -1,16 +1,12 @@
-{ stdenvNoCC, elixir, MIX_HOME, MIX_REBAR3, LANG, env ? "prod" }:
+{ stdenvNoCC, elixir, MIX_HOME, MIX_REBAR3, MIX_ENV, LANG, hash }:
 
-let
-  MIX_ENV = env;
-
-in stdenvNoCC.mkDerivation rec {
+stdenvNoCC.mkDerivation rec {
   name = "mix_deps";
   config = ../config;
   mix_exs = ../mix.exs;
   mix_lock = ../mix.lock;
-  # hash = "sha256:${pkgs.lib.fakeSha256}";
-  hash = "sha256:1biszdl3pbyqf7998387khwpr2i94d76hlbdrdg4hzbdyp4k4wll";
-  inherit MIX_HOME MIX_REBAR3 LANG;
+  cached_mix_deps = ../.nix/deps;
+  inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG;
   buildInputs = [
     elixir
   ];
@@ -23,9 +19,17 @@ in stdenvNoCC.mkDerivation rec {
     ln -s $mix_exs mix.exs
     ln -s $mix_lock mix.lock
 
+    cp -r $cached_mix_deps/. deps/
+
+    export MIX_QUIET=true
+
+    # clean unused deps in current env (MIX_ENV)
+    mix deps.clean --unused --only $MIX_ENV
+
+    mix deps.get --only $MIX_ENV --no-archives-check
+
     mkdir $out
-    export MIX_DEPS_PATH=$out
-    MIX_QUIET=true mix deps.get
+    cp -r deps/. $out/
   '';
 
   outputHashMode = "recursive";

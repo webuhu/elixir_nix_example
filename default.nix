@@ -9,15 +9,22 @@ rec {
 
   MIX_HOME = hex;
   MIX_REBAR3 = "${rebar3}/bin/rebar3";
+  MIX_ENV = env;
   LANG = "C.UTF-8";
 
   mix_deps = pkgs.callPackage ./pkg/mix_deps.nix {
-    inherit elixir MIX_HOME MIX_REBAR3 LANG;
+    inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
+    # Also changing with env
+    # hash = "sha256:${pkgs.lib.fakeSha256}";
+    hash = "sha256:0rri8l1rkwb8m8fgzipzjvy9fbymwwg1ab80sm782cznhzisy32y";
   };
 
-  # mix_build = pkgs.callPackage ./pkg/mix_build.nix {
-  #   inherit elixir MIX_HOME MIX_REBAR3 mix_deps LANG;
-  # };
+  mix_build = pkgs.callPackage ./pkg/mix_build.nix {
+    inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG mix_deps;
+    # Also changing with env
+    # hash = "sha256:${pkgs.lib.fakeSha256}";
+    hash = "sha256:0hdmn8bqhh9cavb2gwnjq1zv79j2ckaawzxmjjpgcdvfbwhp9si0";
+  };
 
   node_modules = pkgs.callPackage ./pkg/node_modules.nix {
     inherit nodejs;
@@ -44,7 +51,7 @@ rec {
     # enable IEx shell history
     export ERL_AFLAGS="-kernel shell_history enabled"
 
-    # fix double paths in ERL_LIBS due to Nix
+    # fix double paths in ERL_LIBS caused by Nix Elixir build
     unset ERL_LIBS
   '';
   cleanup_elixir = ''
@@ -58,7 +65,10 @@ rec {
 
   env_plain = pkgs.mkShell {
     name = "env_plain";
-    inherit MIX_HOME MIX_REBAR3 LANG;
+    inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG;
+    MIX_DEPS_PATH = ".nix/deps";
+    MIX_BUILD_ROOT = ".nix/_build";
+    HEX_HOME = ".nix/hex";
     buildInputs = [
       elixir
       nodejs
@@ -112,7 +122,10 @@ rec {
 
   env_full = pkgs.mkShell {
     name = "env_full";
-    inherit MIX_HOME MIX_REBAR3 mix_deps LANG;
+    inherit MIX_HOME MIX_REBAR3 mix_deps MIX_ENV LANG;
+    MIX_DEPS_PATH = ".nix/deps";
+    MIX_BUILD_ROOT = ".nix/_build";
+    HEX_HOME = ".nix/hex";
     buildInputs = [
       elixir
       nodejs

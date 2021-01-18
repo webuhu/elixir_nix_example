@@ -20,11 +20,13 @@ rec {
     # hash = "sha256:0rri8l1rkwb8m8fgzipzjvy9fbymwwg1ab80sm782cznhzisy32y";
   };
 
+
+  # Needs `--option sandbox relaxed` if used without setting hash (impure fetch)
   mix_build = pkgs.callPackage ./pkg/mix_build.nix {
     inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG mix_deps;
-    # Also changing with env
+    # hash is also changing with env
     # hash = "sha256:${pkgs.lib.fakeSha256}";
-    hash = "sha256:0hdmn8bqhh9cavb2gwnjq1zv79j2ckaawzxmjjpgcdvfbwhp9si0";
+    # hash = "sha256:0hdmn8bqhh9cavb2gwnjq1zv79j2ckaawzxmjjpgcdvfbwhp9si0";
   };
 
   node_modules = pkgs.callPackage ./pkg/node_modules.nix {

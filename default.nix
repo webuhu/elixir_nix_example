@@ -12,11 +12,12 @@ rec {
   MIX_ENV = env;
   LANG = "C.UTF-8";
 
+  # Needs `--option sandbox relaxed` if used without setting hash (impure fetch)
   mix_deps = pkgs.callPackage ./pkg/mix_deps.nix {
     inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
-    # Also changing with env
+    # hash is also changing with env
     # hash = "sha256:${pkgs.lib.fakeSha256}";
-    hash = "sha256:0rri8l1rkwb8m8fgzipzjvy9fbymwwg1ab80sm782cznhzisy32y";
+    # hash = "sha256:0rri8l1rkwb8m8fgzipzjvy9fbymwwg1ab80sm782cznhzisy32y";
   };
 
   mix_build = pkgs.callPackage ./pkg/mix_build.nix {

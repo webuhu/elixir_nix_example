@@ -1,4 +1,4 @@
-# old setup
+# legacy setup
 # decide if watchexc is still useful
 { pkgs, elixir, hex, postgresql, elixir_prepare, MIX_ENV, MIX_REBAR3, LANG }:
 

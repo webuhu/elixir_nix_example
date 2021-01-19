@@ -4,6 +4,8 @@ stdenvNoCC.mkDerivation rec {
   __noChroot = if hash == null then true else false;
   name = "mix_build";
   config = ../config;
+  lib = ../lib;
+  test = ../test;
   mix_exs = ../mix.exs;
   mix_lock = ../mix.lock;
   inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG mix_deps;
@@ -17,6 +19,8 @@ stdenvNoCC.mkDerivation rec {
     unset ERL_LIBS
 
     ln -s $config config
+    ln -s $lib lib
+    ln -s $test test
     ln -s $mix_exs mix.exs
     ln -s $mix_lock mix.lock
 

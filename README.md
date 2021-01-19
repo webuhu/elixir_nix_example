@@ -52,12 +52,6 @@ npm install --prefix assets
 ### Environment
 
 ```sh
-# Elixir Setup (get deps & compile)
-# Necessary before running most of the following commands,
-# as `mix deps.get` is seen as an impure fetch
-# Alias: `app-setup`
-nix-build -A elixir_prepare --option sandbox relaxed
-
 # Enter shell w/ plain development environment
 # Alias: `app-env`
 nix-shell --pure -A env_plain
@@ -82,6 +76,21 @@ nix-shell --pure -A env_full
 ```sh
 # Generate docs using `mix docs`
 # nix-build -A docs
+```
+
+### Build
+```sh
+# Get mix deps
+nix-build -A mix_deps --option sandbox relaxed
+
+# Compile
+nix-build -A mix_build --option sandbox relaxed
+
+# Compile cacheable -> .nix/_build
+nix-shell --pure -A env_plain --command 'mix compile'
+
+# Get JS deps
+nix-build -A node_modules --option sandbox relaxed
 ```
 
 ### Release

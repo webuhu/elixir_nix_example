@@ -3,11 +3,11 @@
 > Example repo to show off how I use Nix as build environment for Elixir / Phoenix projects.  
 > Important Nix stuff is located within `default.nix` & `pkg/` folder.
 
-> ALERT! Currently this is a lot of work in progress!
+> ALERT! Currently there is a lot of work in progress!
 
 ## Setup
 
-This repo provides a quick & easy setup by the usage of [Nix](https://nixos.org).  
+This repo provides an easy environment setup by the usage of [Nix](https://nixos.org).  
 Nix currently runs on **Linux** and **macOS**.
 
 - [Getting Nix](https://nixos.org/download.html)
@@ -15,11 +15,11 @@ Nix currently runs on **Linux** and **macOS**.
 By using Nix, beside Nix nothing else needs to be installed manually.
 
 **Windows**  
-Recommended to run the setup, also using Nix, within a Linux Virtual Machine or using WSL 2.
+Recommended also using Nix within a Linux Virtual Machine or WSL 2.
 
 ### Manual Setup
 
-For maintaining simplicity, instructions for a manual setup isn't part of the documentation.  
+For maintaining simplicity, instructions for a manual setup isn't part of this readme.  
 Anyway, required dependencies:
 
 - [Elixir](https://elixir-lang.org) (& [Erlang](https://www.erlang.org))
@@ -30,25 +30,6 @@ Anyway, required dependencies:
 
 > For convenience an [alias configuration](#aliases) exists for most of the following shell commands.
 
-### Basics
-
-```sh
-# Get mix deps
-mix deps.get
-
-# Start Phoenix server
-mix phx.server
-
-# Start application
-mix run --no-halt
-
-# Enter IEx
-iex -S mix
-
-# JS
-npm install --prefix assets
-```
-
 ### Environment
 
 ```sh
@@ -56,32 +37,50 @@ npm install --prefix assets
 # Alias: `app-env`
 nix-shell --pure -A env_plain
 
-# Run basic commands without shell
-nix-shell --pure -A env_plain --run '<command>'
+# Run commands without shell
+nix-shell --pure -A env_plain --run <command>
+
+# Run commands in interactive shell
+nix-shell --pure -A env_plain --cmd <command>
 
 # Enter shell w/ full development environment (inkl. Database)
 nix-shell --pure -A env_full
-```
 
-### Test
-
-```sh
 # Running all tests
 # Alias: `app-test`
-# nix-shell --pure -A dev.env_full --argstr environment test --run 'mix test'
+nix-shell --pure -A dev.env_full --argstr env test --run 'mix test'
 ```
 
-### Docs
+### Basics commands for working with Elixir / Phoenix
 
 ```sh
-# Generate docs using `mix docs`
-# nix-build -A docs
+# Get Elixir mix deps
+mix deps.get
+
+# Get JS packages
+npm install --prefix assets
+
+# Start Phoenix server
+mix phx.server
+
+# Start Elixir application
+mix run --no-halt
+
+# Enter IEx
+iex -S mix
+
+# Run tests
+mix test
 ```
 
 ### Build
+
 ```sh
-# Get mix deps
+# mix deps
 nix-build -A mix_deps --option sandbox relaxed
+
+# JS packages
+nix-build -A node_modules --option sandbox relaxed
 
 # Compile
 nix-build -A mix_build --option sandbox relaxed
@@ -89,18 +88,14 @@ nix-build -A mix_build --option sandbox relaxed
 # Compile cacheable -> .nix/_build
 nix-shell --pure -A env_plain --command 'mix compile'
 
-# Get JS deps
-nix-build -A node_modules --option sandbox relaxed
-```
+# Generate docs using `mix docs`
+# nix-build -A docs
 
-### Release
-
-```sh
 # Build procution release using `mix release`
-nix-build -A release --argstr environment prod --argstr release_name seed
+# nix-build -A release --argstr env prod --argstr release_name example
 ```
 
-### Maintenance
+### Maintenance commands
 
 ```sh
 # Update pinned Nix pkgs

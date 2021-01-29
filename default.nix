@@ -60,28 +60,21 @@ rec {
     # hash = "sha256:${pkgs.lib.fakeSha256}";
   };
 
-  base_hooks = ''
+  base_hook = ''
     # short default prompt
     export PS1='\e[0;32m[nix-shell@\h] \W>\e[m '
   '';
-  elixir_hooks = ''
+  elixir_hook = ''
     # enable IEx shell history
     export ERL_AFLAGS="-kernel shell_history enabled"
 
     # fix double paths in ERL_LIBS caused by Nix Elixir build
     unset ERL_LIBS
   '';
-  cleanup_elixir = ''
-    cleanup_elixir() {
-      echo 'cleanup elixir ...'
+  hooks = base_hook + elixir_hook;
 
-      rm -rf deps _build
-    }
-  '';
-  hooks = base_hooks + elixir_hooks;
-
-  env_plain = pkgs.mkShell {
-    name = "env_plain";
+  env_slim = pkgs.mkShell {
+    name = "env_slim";
     inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG;
     MIX_DEPS_PATH = ".nix/deps";
     MIX_BUILD_ROOT = ".nix/_build";
@@ -94,49 +87,11 @@ rec {
     shellHook = hooks;
   };
 
-  # TODO: database name to variable ...
-  postgresql_setup = ''
-    export PGDATA=$(mktemp --directory)
+  postgresql_setup = import ./pkg/temporory_postgresql_db.nix {};
 
-    # PG_LISTENING_ADDRESS default to localhost
-    # TODO: Check that!
-    # : ''${PG_LISTENING_ADDRESS:=127.0.0.1}
-    PG_LISTENING_ADDRESS='127.0.0.1'
-
-    # DB only listening on socket - no TCP.
-    # Necessary to run tests concurrently.
-    if [ $MIX_ENV = 'test' ]
-    then
-      export PG_LISTENING_ADDRESS="'''"
-    fi
-
-    initdb --locale=C --encoding=UTF8 --auth-local=peer --auth-host=scram-sha-256 > /dev/null || exit
-
-    # set -m fixes ^C kill postgresql
-    set -m
-    # get options for -o from: `postgres --help`
-    pg_ctl -l $PGDATA/postgresql.log -o "-k $PGDATA -h $PG_LISTENING_ADDRESS" start || exit
-
-    createdb -h $PGDATA elixir_nix_example_dev
-    psql -h $PGDATA elixir_nix_example_dev -c "COMMENT ON DATABASE elixir_nix_example_dev IS 'Database for Development, Testing & CI'" > /dev/null
-
-    # createuser postgres --createdb
-    # if [ $MIX_ENV = 'dev' ]
-    # then
-    #   psql -h $PGDATA elixir_nix_example_dev -c "CREATE USER dev PASSWORD 'secret'" > /dev/null
-    # fi
-
-    cleanup_postgres() {
-      echo 'cleanup postgres ...'
-
-      pg_ctl stop --silent
-      rm -rf $NIX_SHELL_DIR/.postgresql
-    }
-  '';
-
-  env_full = pkgs.mkShell {
-    name = "env_full";
-    inherit MIX_HOME MIX_REBAR3 mix_deps MIX_ENV LANG;
+  env_with_db = pkgs.mkShell {
+    name = "env_with_db";
+    inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG;
     MIX_DEPS_PATH = ".nix/deps";
     MIX_BUILD_ROOT = ".nix/_build";
     HEX_HOME = ".nix/hex";
@@ -146,20 +101,6 @@ rec {
       pkgs.inotify-tools
       postgresql
     ];
-    shellHook = hooks + postgresql_setup + ''
-      ln -s $mix_deps deps
-
-      cleanup_elixir() {
-        echo 'cleanup elixir ...'
-
-        rm -rf deps _build
-      }
-
-      cleanup_all() {
-        cleanup_elixir
-        cleanup_postgres
-      }
-      trap cleanup_all EXIT
-    '';
+    shellHook = hooks + postgresql_setup;
   };
 }

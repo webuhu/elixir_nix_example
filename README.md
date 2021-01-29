@@ -33,22 +33,22 @@ Anyway, required dependencies:
 ### Environment
 
 ```sh
-# Enter shell w/ plain development environment
+# Enter shell w/ development environment (no database)
 # Alias: `app-env`
-nix-shell --pure -A env_plain
+nix-shell --pure -A env_slim
 
 # Run commands without shell
-nix-shell --pure -A env_plain --run <command>
+nix-shell --pure -A env_slim --run <command>
 
 # Run commands in interactive shell
-nix-shell --pure -A env_plain --cmd <command>
+nix-shell --pure -A env_slim --cmd <command>
 
-# Enter shell w/ full development environment (inkl. Database)
-nix-shell --pure -A env_full
+# Enter shell w/ development environment and temporary PostgreSQL database
+nix-shell --pure -A env_with_db
 
 # Running all tests
 # Alias: `app-test`
-nix-shell --pure -A dev.env_full --argstr env test --run 'mix test'
+nix-shell --pure -A dev.env_with_db --argstr env test --run 'mix test'
 ```
 
 ### Basics commands for working with Elixir / Phoenix
@@ -86,7 +86,7 @@ nix-build -A node_modules --option sandbox relaxed
 nix-build -A mix_build --option sandbox relaxed
 
 # Compile cacheable -> .nix/_build
-nix-shell --pure -A env_plain --command 'mix compile'
+nix-shell --pure -A env_slim --command 'mix compile'
 
 # Generate docs using `mix docs`
 nix-build -A docs --option sandbox relaxed

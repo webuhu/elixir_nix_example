@@ -1,25 +1,25 @@
-{config, pkgs, lib, ...}:
+{config, pkgs, lib, release_name, working_directory, ...}:
 
 let
   release = (import ../default.nix {}).release;
 in
 {
-  systemd.services.elixir-app = {
+  "systemd.services.${release_name}" = {
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
-    description = "elixir-app release";
+    description = release_name;
     serviceConfig = {
       Type = "exec";
       User = "main";
-      WorkingDirectory = "/home/main/app/elixir-app";
+      WorkingDirectory = working_directory;
       ExecStart = ''
-        ${release}/bin/elixir-app start
+        ${release}/bin/${release_name} start
       '';
       ExecStop = ''
-        ${release}/bin/elixir-app stop
+        ${release}/bin/${release_name} stop
       '';
       ExecReload = ''
-        ${release}/bin/elixir-app restart
+        ${release}/bin/${release_name} restart
       '';
       Restart = "on-failure";
       RestartSec = 5;

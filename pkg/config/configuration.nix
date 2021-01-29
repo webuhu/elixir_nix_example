@@ -3,7 +3,10 @@
 {
   imports = [
     ./hardware-configuration.nix
-    /home/main/app/elixir-app/source/pkg/service.nix
+    /home/main/app/elixir-app/source/pkg/service.nix {
+      release_name = "elixir-app";
+      working_directory = "/home/main/app/elixir-app";
+    }
   ];
 
   # Use the GRUB 2 boot loader.

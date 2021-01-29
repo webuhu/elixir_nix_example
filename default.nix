@@ -29,7 +29,8 @@ rec {
 
   # Needs `--option sandbox relaxed` if used without setting hash (impure fetch)
   mix_build = pkgs.callPackage ./pkg/mix_build.nix {
-    inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG mix_deps;
+    inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
+    inherit mix_deps;
     # hash is also changing with env
     # hash = "sha256:${pkgs.lib.fakeSha256}";
   };
@@ -40,11 +41,22 @@ rec {
     # hash = "sha256:${pkgs.lib.fakeSha256}";
   };
 
-  # Needs `--option sandbox relaxed` if used without setting hash (impure fetch)
+  # Needs `--option sandbox relaxed` if used without setting hash & hashed inputs (impure fetch)
   # Works probably only for env "dev" → mix.exs
   docs = pkgs.callPackage ./pkg/docs.nix {
-    inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG mix_deps mix_build;
+    inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
+    inherit mix_deps mix_build;
     # hash is also changing with env
+    # hash = "sha256:${pkgs.lib.fakeSha256}";
+  };
+
+  # Needs `--option sandbox relaxed` if used without setting hash & hashed inputs (impure fetch)
+  release = pkgs.callPackage ./pkg/release.nix {
+    inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
+    inherit mix_deps mix_build release_name;
+    inherit node_modules;
+    inherit nodejs;
+    # hash is also changing with env & release_name
     # hash = "sha256:${pkgs.lib.fakeSha256}";
   };
 

@@ -92,7 +92,7 @@ nix-shell --pure -A env_plain --command 'mix compile'
 nix-build -A docs --option sandbox relaxed
 
 # Build procution release using `mix release`
-# nix-build -A release --argstr env prod --argstr release_name example
+nix-build -A release --argstr env prod --option sandbox relaxed
 ```
 
 ### Maintenance commands

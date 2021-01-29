@@ -1,10 +1,12 @@
-{config, pkgs, lib, release_name, working_directory, ...}:
+{config, pkgs, lib, ...}:
 
 let
   release = (import ../default.nix {}).release;
+  release_name = "elixir-app";
+  working_directory = "/home/main/app/elixir-app";
 in
 {
-  "systemd.services.${release_name}" = {
+  systemd.services.${release_name} = {
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
     description = release_name;

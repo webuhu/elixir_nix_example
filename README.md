@@ -3,8 +3,6 @@
 > Example repo to show off how I use Nix as build environment for Elixir / Phoenix projects.  
 > Important Nix stuff is located within `default.nix` & `pkg/` folder.
 
-> ALERT! Currently there is a lot of work in progress!
-
 ## Setup
 
 This repo provides an easy environment setup by the usage of [Nix](https://nixos.org).  
@@ -28,7 +26,7 @@ Anyway, required dependencies:
 
 ## Development
 
-> For convenience an [alias configuration](#aliases) exists for most of the following shell commands.
+> For convenience an [alias configuration](#aliases) exists for some of the following shell commands.
 
 ### Environment
 
@@ -48,7 +46,7 @@ nix-shell --pure -A env_with_db
 
 # Running all tests
 # Alias: `app-test`
-nix-shell --pure -A dev.env_with_db --argstr env test --run 'mix test'
+nix-shell --pure -A env_with_db --argstr env test --run 'mix test'
 ```
 
 ### Basics commands for working with Elixir / Phoenix
@@ -122,7 +120,7 @@ npm update --prefix assets
 ## Aliases
 
 ```sh
-# Load the aliases into your shell
+# Load aliases into your shell
 # You could also source this in your .profile
 . pkg/scripts/alias.sh
 ```

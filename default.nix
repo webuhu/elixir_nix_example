@@ -12,6 +12,14 @@ rec {
   MIX_ENV = env;
   LANG = "C.UTF-8";
 
+  hex = pkgs.callPackage ./pkg/hex.nix {
+    inherit elixir LANG;
+  };
+
+  rebar3 = pkgs.callPackage ./pkg/rebar3.nix {
+    inherit erlang;
+  };
+
   # Needs `--option sandbox relaxed` if used without setting hash (impure fetch)
   mix_deps = pkgs.callPackage ./pkg/mix_deps.nix {
     inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
@@ -32,18 +40,13 @@ rec {
     # hash = "sha256:${pkgs.lib.fakeSha256}";
   };
 
-  hex = pkgs.callPackage ./pkg/hex.nix {
-    inherit elixir LANG;
+  # Needs `--option sandbox relaxed` if used without setting hash (impure fetch)
+  # Works probably only for env "dev" → mix.exs
+  docs = pkgs.callPackage ./pkg/docs.nix {
+    inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG mix_deps mix_build;
+    # hash is also changing with env
+    # hash = "sha256:${pkgs.lib.fakeSha256}";
   };
-
-  rebar3 = pkgs.callPackage ./pkg/rebar3.nix {
-    inherit erlang;
-  };
-
-  # Add docs to mix.exs first
-  # docs = pkgs.callPackage ./pkg/docs.nix {
-  #   inherit elixir mix_deps MIX_HOME MIX_REBAR3 LANG;
-  # };
 
   base_hooks = ''
     # short default prompt

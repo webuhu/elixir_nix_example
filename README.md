@@ -89,7 +89,7 @@ nix-build -A mix_build --option sandbox relaxed
 nix-shell --pure -A env_plain --command 'mix compile'
 
 # Generate docs using `mix docs`
-# nix-build -A docs
+nix-build -A docs --option sandbox relaxed
 
 # Build procution release using `mix release`
 # nix-build -A release --argstr env prod --argstr release_name example

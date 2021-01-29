@@ -94,16 +94,6 @@ rec {
     shellHook = hooks;
   };
 
-  # to be used when MIX_ENV is integrated again
-  # fix_db_listening_in_test = ''
-  #   # DB only listening on socket - no TCP.
-  #   # Necessary to run tests concurrently.
-  #   if [ $MIX_ENV = 'test' ]
-  #   then
-  #     export PG_LISTENING_ADDRESS="'''"
-  #   fi
-  # ''
-
   # TODO: database name to variable ...
   postgresql_setup = ''
     export PGDATA=$(mktemp --directory)
@@ -112,6 +102,13 @@ rec {
     # TODO: Check that!
     # : ''${PG_LISTENING_ADDRESS:=127.0.0.1}
     PG_LISTENING_ADDRESS='127.0.0.1'
+
+    # DB only listening on socket - no TCP.
+    # Necessary to run tests concurrently.
+    if [ $MIX_ENV = 'test' ]
+    then
+      export PG_LISTENING_ADDRESS="'''"
+    fi
 
     initdb --locale=C --encoding=UTF8 --auth-local=peer --auth-host=scram-sha-256 > /dev/null || exit
 

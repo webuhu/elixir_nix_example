@@ -22,6 +22,12 @@ stdenvNoCC.mkDerivation rec {
     ln -s $mix_exs mix.exs
     ln -s $mix_lock mix.lock
 
+    cp -r $mix_build/. _build/
+    chmod -R 700 _build
+
+    cp -r $mix_deps/. deps/
+    chmod -R 700 deps
+
     cp -r $assets/. assets/
     chmod -R 700 assets
 
@@ -29,13 +35,7 @@ stdenvNoCC.mkDerivation rec {
 
     cp -r $priv/. priv/
     chmod -R 700 priv
-
-    cp -r $mix_deps/. deps/
-    chmod -R 700 deps
-
-    cp -r $mix_build/. _build/
-    chmod -R 700 _build
-
+ 
     npm run deploy --prefix ./assets
     mix phx.digest
 

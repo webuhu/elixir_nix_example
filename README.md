@@ -33,20 +33,20 @@ Anyway, required dependencies:
 ```sh
 # Enter shell w/ development environment (no database)
 # Alias: `app-env`
-nix-shell --pure -A env_slim
+nix-shell --pure -A env
 
 # Run commands without shell
-nix-shell --pure -A env_slim --run <command>
+nix-shell --pure -A env --run <command>
 
 # Run commands in interactive shell
-nix-shell --pure -A env_slim --cmd <command>
+nix-shell --pure -A env --cmd <command>
 
 # Enter shell w/ development environment and temporary PostgreSQL database
 nix-shell --pure -A env_with_db
 
 # Running all tests
 # Alias: `app-test`
-nix-shell --pure -A env_with_db --argstr env test --run 'mix test'
+nix-shell --pure -A env_with_db --argstr MIX_ENV test --run 'mix test'
 ```
 
 ### Basics commands for working with Elixir / Phoenix
@@ -84,13 +84,13 @@ nix-build -A node_modules --option sandbox relaxed
 nix-build -A mix_build --option sandbox relaxed
 
 # Compile cacheable -> .nix/_build
-nix-shell --pure -A env_slim --command 'mix compile'
+nix-shell --pure -A env --command 'mix compile'
 
 # Generate docs using `mix docs`
 nix-build -A docs --option sandbox relaxed
 
 # Build procution release using `mix release`
-nix-build -A release --argstr env prod --option sandbox relaxed
+nix-build -A release --argstr MIX_ENV prod --option sandbox relaxed
 ```
 
 ### Maintenance commands
@@ -99,22 +99,16 @@ nix-build -A release --argstr env prod --option sandbox relaxed
 # Update pinned Nix pkgs
 elixir pkg/scripts/pkgs_update.exs
 
-# Check outdated deps
+# Check outdated Mix deps & NPM packages
 mix hex.outdated
-
-# Update deps
-mix deps.update --all
-# + npm update ... (phx)
-# needs mix_deps hash update
-
-# Removed unused deps
-mix deps.clean --unlock --unused
-
-# Check outdated npm packages
 npm outdated --prefix assets
 
-# Update npm packages
+# Update Mix deps & NPM packages
+mix deps.update --all
 npm update --prefix assets
+
+# Removed unused deps from mix.lock
+mix deps.clean --unlock --unused
 ```
 
 ## Aliases

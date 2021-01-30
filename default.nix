@@ -1,4 +1,4 @@
-{ pkgs ? import ./pkg/_pkgs.nix, env ? "dev", release_name ? "example" }:
+{ pkgs ? import ./pkg/_pkgs.nix, MIX_ENV ? "dev", release_name ? "example" }:
 
 rec {
   erlang = pkgs.erlangR23;
@@ -9,7 +9,6 @@ rec {
 
   MIX_HOME = hex;
   MIX_REBAR3 = "${rebar3}/bin/rebar3";
-  MIX_ENV = env;
   LANG = "C.UTF-8";
 
   hex = pkgs.callPackage ./pkg/hex.nix {
@@ -73,8 +72,8 @@ rec {
   '';
   hooks = base_hook + elixir_hook;
 
-  env_slim = pkgs.mkShell {
-    name = "env_slim";
+  env = pkgs.mkShell {
+    name = "env";
     inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG;
     MIX_DEPS_PATH = ".nix/deps";
     MIX_BUILD_ROOT = ".nix/_build";

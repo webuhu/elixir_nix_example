@@ -4,9 +4,8 @@
 /deps/
 /doc/
 # /secrets/
+/.nix/
 
 erl_crash.dump
 
 /priv/static/
-
-/.nix/

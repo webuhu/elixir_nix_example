@@ -18,10 +18,8 @@ stdenvNoCC.mkDerivation rec {
     ln -s $mix_lock mix.lock
 
     export HEX_HOME=$TMPDIR/hex
+    export MIX_DEPS_PATH=$out
     MIX_QUIET=true mix deps.get --only $MIX_ENV --no-archives-check
-
-    mkdir $out
-    cp -r deps/. $out/
   '';
 
   outputHashMode = "recursive";

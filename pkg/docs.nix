@@ -1,4 +1,4 @@
-{ stdenvNoCC, elixir, MIX_HOME, MIX_REBAR3, MIX_ENV, LANG, mix_deps, mix_build, hash ? null }:
+{ stdenvNoCC, lib, elixir, MIX_HOME, MIX_REBAR3, MIX_ENV, LANG, mix_deps, mix_build, hash ? null }:
 
 stdenvNoCC.mkDerivation rec {
   __noChroot = if hash == null then true else false;
@@ -34,5 +34,5 @@ stdenvNoCC.mkDerivation rec {
   outputHashMode = "recursive";
   outputHash = hash;
 
-  impureEnvVars = stdenvNoCC.lib.fetchers.proxyImpureEnvVars;
+  impureEnvVars = lib.fetchers.proxyImpureEnvVars;
 }

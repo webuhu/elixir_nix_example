@@ -1,8 +1,8 @@
 { pkgs ? import ./pkg/_pkgs.nix, MIX_ENV ? "dev", release_name ? "example" }:
 
 rec {
-  erlang = pkgs.erlangR23;
-  elixir = pkgs.buildPackages.beam.packages.erlangR23.elixir;
+  erlang = pkgs.beam_nox.interpreters.erlangR23;
+  elixir = pkgs.buildPackages.beam_nox.packages.erlangR23.elixir_1_11;
   nodejs = pkgs.nodejs-15_x;
 
   postgresql = pkgs.postgresql_13;

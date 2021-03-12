@@ -12,12 +12,12 @@
     "@babel/core": "^7.x",
     "@babel/preset-env": "^7.x",
     "babel-loader": "^8.x",
-    "copy-webpack-plugin": "^7.x",
+    "copy-webpack-plugin": "^8.x",
     "css-loader": "^5.x",
     "css-minimizer-webpack-plugin": "^1.x",
     "mini-css-extract-plugin": "^1.x",
     "sass": "^1.x",
-    "sass-loader": "^10.x",
+    "sass-loader": "^11.x",
     "webpack": "^5.x",
     "webpack-cli": "^4.x"
   }

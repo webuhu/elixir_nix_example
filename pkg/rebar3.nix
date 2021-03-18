@@ -2,11 +2,10 @@
 
 stdenvNoCC.mkDerivation rec {
   pname = "rebar3";
-  # rebar 3.14.x wont work prior Elixir 1.12
-  version = "3.13.2";
+  version = "3.14.4";
   # How to obtain hash:
   # nix-prefetch-url https://github.com/erlang/rebar3/releases/download/<version>/rebar3
-  hash = "sha256:063h8i15315cmman4i6hd33vj5ydd9qggfww517ys9nyqc5c1n5x";
+  hash = "sha256:03wnpdxr6qsmlxn8cr4g5p8kbi8gqr84wkid9kc2956wxb3d9ckl";
   src = import <nix/fetchurl.nix> {
     url = "https://github.com/erlang/rebar3/releases/download/${version}/rebar3";
     inherit hash;

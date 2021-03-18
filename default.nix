@@ -86,7 +86,7 @@ rec {
     shellHook = hooks;
   };
 
-  postgresql_setup = import ./pkg/temporory_postgresql_db.nix {};
+  postgresql_setup = import ./pkg/temporary_postgresql_db.nix {};
 
   env_with_db = pkgs.mkShell {
     name = "env_with_db";

@@ -1,14 +1,13 @@
-{ stdenvNoCC, lib, elixir, MIX_HOME, MIX_REBAR3, MIX_ENV, LANG, mix_deps, hash ? null }:
+{ stdenvNoCC, lib, elixir, MIX_HOME, MIX_REBAR3, MIX_ENV, LANG, mix_deps, mix_deps_build, hash ? null }:
 
 stdenvNoCC.mkDerivation rec {
   __noChroot = if hash == null then true else false;
   name = "mix_build";
   config = ../config;
-  lib = ../lib;
-  test = ../test;
+  lib_dir = ../lib;
   mix_exs = ../mix.exs;
   mix_lock = ../mix.lock;
-  inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG mix_deps;
+  inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG mix_deps mix_deps_build;
   buildInputs = [
     elixir
   ];
@@ -19,13 +18,15 @@ stdenvNoCC.mkDerivation rec {
     unset ERL_LIBS
 
     ln -s $config config
-    ln -s $lib lib
-    ln -s $test test
+    ln -s $lib_dir lib
     ln -s $mix_exs mix.exs
     ln -s $mix_lock mix.lock
 
     cp -r $mix_deps/. deps/
     chmod -R 700 deps
+
+    cp -r $mix_deps_build/. _build/
+    chmod -R 700 _build
 
     mix compile
 

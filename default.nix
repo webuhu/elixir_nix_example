@@ -2,7 +2,7 @@
 
 rec {
   erlang = pkgs.beam_nox.interpreters.erlangR23;
-  elixir = pkgs.buildPackages.beam_nox.packages.erlangR23.elixir_1_11;
+  elixir = pkgs.beam_nox.packages.erlangR23.elixir_1_11;
   nodejs = pkgs.nodejs-15_x;
 
   postgresql = pkgs.postgresql_13;
@@ -20,16 +20,24 @@ rec {
   };
 
   # Needs `--option sandbox relaxed` if used without setting hash (impure fetch)
-  mix_deps = pkgs.callPackage ./pkg/mix_deps.nix {
+  mix_deps = pkgs.callPackage ./pkg/mix_deps_get.nix {
     inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
     # hash is also changing with env
     # hash = "sha256:${pkgs.lib.fakeSha256}";
   };
 
   # Needs `--option sandbox relaxed` if used without setting hash (impure fetch)
-  mix_build = pkgs.callPackage ./pkg/mix_build.nix {
+  mix_deps_build = pkgs.callPackage ./pkg/mix_deps_compile.nix {
     inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
     inherit mix_deps;
+    # hash is also changing with env
+    # hash = "sha256:${pkgs.lib.fakeSha256}";
+  };
+
+  # Needs `--option sandbox relaxed` if used without setting hash (impure fetch)
+  mix_build = pkgs.callPackage ./pkg/mix_compile.nix {
+    inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
+    inherit mix_deps mix_deps_build;
     # hash is also changing with env
     # hash = "sha256:${pkgs.lib.fakeSha256}";
   };
@@ -42,7 +50,7 @@ rec {
 
   # Needs `--option sandbox relaxed` if used without setting hash & hashed inputs (impure fetch)
   # Works probably only for env "dev" → mix.exs
-  docs = pkgs.callPackage ./pkg/docs.nix {
+  docs = pkgs.callPackage ./pkg/mix_docs.nix {
     inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
     inherit mix_deps mix_build;
     # hash is also changing with env
@@ -50,7 +58,7 @@ rec {
   };
 
   # Needs `--option sandbox relaxed` if used without setting hash & hashed inputs (impure fetch)
-  release = pkgs.callPackage ./pkg/release.nix {
+  release = pkgs.callPackage ./pkg/mix_release.nix {
     inherit elixir MIX_HOME MIX_REBAR3 MIX_ENV LANG;
     inherit mix_deps mix_build release_name;
     inherit node_modules;

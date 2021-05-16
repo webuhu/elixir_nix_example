@@ -3,6 +3,11 @@
 > Example repo to show off how I use Nix as build environment for Elixir / Phoenix projects.  
 > Important Nix stuff is located within `default.nix` & `pkg/` folder.
 
+## Note
+
+Since starting this example a lot of positive things have happened or are happening within Nixpkgs.  
+You may be interestet in `mixRelease` or friends.
+
 ## Setup
 
 This repo provides an easy environment setup by the usage of [Nix](https://nixos.org).  

@@ -15,10 +15,14 @@ rec {
   MIX_REBAR3 = "${rebar3}/bin/rebar3";
   LANG = "C.UTF-8";
 
+  # This is opinionated instead of simple using:
+  # hex = pkgs.beam.packages.erlang.hex;
   hex = pkgs.callPackage ./pkg/hex.nix {
     inherit elixir LANG;
   };
 
+  # This is opinionated instead of simple using:
+  # rebar3 = pkgs.beam.packages.erlang.rebar3;
   rebar3 = pkgs.callPackage ./pkg/rebar3.nix {
     inherit erlang;
   };

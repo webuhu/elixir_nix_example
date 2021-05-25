@@ -14,9 +14,6 @@ stdenvNoCC.mkDerivation rec {
   builder = builtins.toFile "builder.sh" ''
     source $stdenv/setup
 
-    # fix double paths in ERL_LIBS caused by Nix Elixir build
-    unset ERL_LIBS
-
     ln -s $config config
     ln -s $lib_dir lib
     ln -s $mix_exs mix.exs

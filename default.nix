@@ -82,9 +82,6 @@ rec {
   elixir_hook = ''
     # enable IEx shell history
     export ERL_AFLAGS="-kernel shell_history enabled"
-
-    # fix double paths in ERL_LIBS caused by Nix Elixir build
-    unset ERL_LIBS
   '';
   hooks = base_hook + elixir_hook;
 

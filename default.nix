@@ -4,9 +4,9 @@ rec {
   erlang = pkgs.beam.interpreters.erlangR24;
   # BEAM no X versions are not in cache - needs to build yourself
   # erlang = pkgs.beam_nox.interpreters.erlangR24;
-  elixir = pkgs.beam.packages.erlangR24.elixir_1_11;
+  elixir = pkgs.beam.packages.erlangR24.elixir_1_12;
   # BEAM no X versions are not in cache - needs to build yourself
-  # elixir = pkgs.beam_nox.packages.erlangR24.elixir_1_11;
+  # elixir = pkgs.beam_nox.packages.erlangR24.elixir_1_12;
   nodejs = pkgs.nodejs-16_x;
 
   postgresql = pkgs.postgresql_13;

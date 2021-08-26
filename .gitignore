@@ -1,11 +1,2 @@
-/_build/
-/assets/node_modules/
-/cover/
-/deps/
-/doc/
 # /secrets/
 /.nix/
-
-erl_crash.dump
-
-/priv/static/

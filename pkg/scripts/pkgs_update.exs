@@ -1,10 +1,12 @@
+Mix.install([:castore])
+
 defmodule PkgsUpdate do
   @moduledoc """
   Updates the local pkg/_pkgs.nix file with pin to the latest Nix packages on Github.
   """
 
   @nix_pkg_download_url "https://github.com/NixOS/nixpkgs/archive"
-  @github_channel "nixos-unstable-small"
+  @github_channel "nixpkgs-unstable"
 
   @doc """
   Run the pkg/_pkgs.nix update generation.
@@ -25,20 +27,35 @@ defmodule PkgsUpdate do
 
   @spec github_api_request(binary()) :: charlist()
   defp github_api_request(github_api_url) do
-    request = {to_charlist(github_api_url), [{'User-Agent', 'httpc'}]}
+    url = String.to_charlist(github_api_url)
 
-    :inets.start()
-    :ssl.start()
+    {:ok, _} = Application.ensure_all_started(:inets)
+    {:ok, _} = Application.ensure_all_started(:ssl)
 
-    {:ok, {_, _, body}} =
-      :httpc.request(
-        :get,
-        request,
-        [],
-        body_format: :binary
-      )
+    # https://erlef.github.io/security-wg/secure_coding_and_deployment_hardening/inets
+    cacertfile = CAStore.file_path() |> String.to_charlist()
 
-    body
+    http_options = [
+      ssl: [
+        verify: :verify_peer,
+        cacertfile: cacertfile,
+        depth: 2,
+        customize_hostname_check: [
+          match_fun: :public_key.pkix_verify_hostname_match_fun(:https)
+        ]
+      ]
+    ]
+
+    user_agent = {'User-Agent', 'httpc'}
+    options = [body_format: :binary]
+
+    case :httpc.request(:get, {url, [user_agent]}, http_options, options) do
+      {:ok, {{_, 200, _}, _headers, body}} ->
+        body
+
+      other ->
+        raise "couldn't fetch #{url}: #{inspect(other)}"
+    end
   end
 
   @spec get_latest_commit_sha(binary()) :: binary()

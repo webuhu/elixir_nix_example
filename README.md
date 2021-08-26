@@ -1,12 +1,15 @@
 # Elixir (Phoenix) Nix Example
 
 > Example repo to show off how I use Nix as build environment for Elixir / Phoenix projects.  
-> Important Nix stuff is located within `default.nix` & `pkg/` folder.
+> Important Nix stuff is located within `default.nix` & `pkg/` folder.  
+This repo is not a working project! It just contains parts of the workflow.
 
 ## Note
 
-Since starting this example a lot of positive things have happened or are happening within Nixpkgs.  
+Since starting this example a lot of positive things have happened or are happening within Nixpkgs.
 You may be interestet in `mixRelease` or friends.
+
+I for myself stopped to use a full Nix leveraging build setup. I only use parts of this workflow anymore with reusing local `_build` & `deps` as it speeds up my things for my requirements enorm.
 
 ## Setup
 
@@ -104,16 +107,16 @@ nix-build -A release --argstr MIX_ENV prod --option sandbox relaxed
 # Update pinned Nix pkgs
 elixir pkg/scripts/pkgs_update.exs
 
-# Check outdated Mix deps & NPM packages
+# Check / Update Mix deps
 mix hex.outdated
-npm outdated --prefix assets
-
-# Update Mix deps & NPM packages
 mix deps.update --all
-npm update --prefix assets
 
 # Removed unused deps from mix.lock
 mix deps.clean --unlock --unused
+
+# Check / Update NPM packages
+npm outdated --prefix assets
+npm update --prefix assets
 ```
 
 ## Aliases

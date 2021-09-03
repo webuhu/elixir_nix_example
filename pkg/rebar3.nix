@@ -1,4 +1,4 @@
-{ stdenvNoCC, erlang }:
+{ stdenvNoCC, fetchurl, erlang }:
 
 stdenvNoCC.mkDerivation rec {
   pname = "rebar3";
@@ -6,7 +6,7 @@ stdenvNoCC.mkDerivation rec {
   # How to obtain hash:
   # nix-prefetch-url https://github.com/erlang/rebar3/releases/download/<version>/rebar3
   hash = "sha256:1pcb2cgq6jlxxv28bq5c1cap7mq1wsvc2dqzjj3b5fz9n2k67jqp";
-  src = import <nix/fetchurl.nix> {
+  src = fetchurl {
     url = "https://github.com/erlang/rebar3/releases/download/${version}/rebar3";
     inherit hash;
   };

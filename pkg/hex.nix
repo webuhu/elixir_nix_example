@@ -2,11 +2,11 @@
 
 stdenvNoCC.mkDerivation rec {
   pname = "hex";
-  version = "0.21.2";
-  elixir_version = "1.11.0";
+  version = "0.21.3";
+  elixir_version = "1.12.0";
   # How to obtain hash:
   # nix-prefetch-url https://repo.hex.pm/installs/<elixir_verion>/hex-<version>.ez
-  hash = "sha256:0cdx2xv2qpv7a77j1b8xmiiapv0y8vsb3q2r06g73bxj5gwgcipm";
+  hash = "sha256:08n51hjjf0b2lrbs48xz21sbda5fsh45c9g9wq0r6lq9qkh3ygb2";
   src = fetchurl {
     url = "https://repo.hex.pm/installs/${elixir_version}/hex-${version}.ez";
     inherit hash;

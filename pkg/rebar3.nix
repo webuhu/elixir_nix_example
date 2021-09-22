@@ -2,10 +2,10 @@
 
 stdenvNoCC.mkDerivation rec {
   pname = "rebar3";
-  version = "3.16.1";
+  version = "3.17.0";
   # How to obtain hash:
   # nix-prefetch-url https://github.com/erlang/rebar3/releases/download/<version>/rebar3
-  hash = "sha256:1pcb2cgq6jlxxv28bq5c1cap7mq1wsvc2dqzjj3b5fz9n2k67jqp";
+  hash = "sha256:10f1v62if9g5l8db9fvxm52h3g9rdprgc5dbzrpp6f6vd9g347rr";
   src = fetchurl {
     url = "https://github.com/erlang/rebar3/releases/download/${version}/rebar3";
     inherit hash;

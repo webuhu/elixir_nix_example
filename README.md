@@ -101,22 +101,21 @@ nix-build -A docs --option sandbox relaxed
 nix-build -A release --argstr MIX_ENV prod --option sandbox relaxed
 ```
 
-### Maintenance commands
+### Maintenance
 
 ```sh
 # Update pinned Nix pkgs
 elixir pkg/scripts/pkgs_update.exs
 
-# Check / Update Mix deps
+# Check / update / clean Mix deps
 mix hex.outdated
 mix deps.update --all
-
-# Removed unused deps from mix.lock
 mix deps.clean --unlock --unused
 
-# Check / Update NPM packages
+# Check / update / clean NPM packages
 npm outdated --prefix assets
 npm update --prefix assets
+npm prune --prefix assets
 ```
 
 ## Aliases

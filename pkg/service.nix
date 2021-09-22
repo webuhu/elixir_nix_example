@@ -25,8 +25,6 @@ in
       '';
       Restart = "on-failure";
       RestartSec = 5;
-      StartLimitBurst = 3;
-      StartLimitInterval = 10;
     };
     # needed for disksup do have sh available
     path = [ pkgs.bash ];

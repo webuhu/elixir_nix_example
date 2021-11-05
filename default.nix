@@ -9,8 +9,6 @@ rec {
   # elixir = pkgs.beam_nox.packages.erlangR24.elixir_1_12;
   nodejs = pkgs.nodejs-16_x;
 
-  postgresql = pkgs.postgresql_13;
-
   MIX_HOME = hex;
   MIX_REBAR3 = "${rebar3}/bin/rebar3";
   LANG = "C.UTF-8";
@@ -18,7 +16,7 @@ rec {
   # This is opinionated instead of simple using:
   # hex = pkgs.beam.packages.erlang.hex;
   hex = pkgs.callPackage ./pkg/hex.nix {
-    inherit elixir LANG;
+    inherit elixir;
   };
 
   # This is opinionated instead of simple using:
@@ -73,46 +71,5 @@ rec {
     inherit nodejs;
     # hash is also changing with env & release_name
     # hash = "sha256:${pkgs.lib.fakeSha256}";
-  };
-
-  base_hook = ''
-    # short default prompt
-    export PS1='\e[0;32m[nix-shell@\h] \W>\e[m '
-  '';
-  elixir_hook = ''
-    # enable IEx shell history
-    export ERL_AFLAGS="-kernel shell_history enabled"
-  '';
-  hooks = base_hook + elixir_hook;
-
-  env = pkgs.mkShell {
-    name = "env";
-    inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG;
-    MIX_DEPS_PATH = ".nix/deps";
-    MIX_BUILD_ROOT = ".nix/_build";
-    HEX_HOME = ".nix/hex";
-    buildInputs = [
-      elixir
-      nodejs
-      pkgs.inotify-tools
-    ];
-    shellHook = hooks;
-  };
-
-  postgresql_setup = import ./pkg/temporary_postgresql_db.nix {};
-
-  env_with_db = pkgs.mkShell {
-    name = "env_with_db";
-    inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG;
-    MIX_DEPS_PATH = ".nix/deps";
-    MIX_BUILD_ROOT = ".nix/_build";
-    HEX_HOME = ".nix/hex";
-    buildInputs = [
-      elixir
-      nodejs
-      pkgs.inotify-tools
-      postgresql
-    ];
-    shellHook = hooks + postgresql_setup;
   };
 }

@@ -8,15 +8,13 @@
 
   # DB only listening on socket - no TCP.
   # Necessary to run tests concurrently.
-  if [ $MIX_ENV = 'test' ]
+  if [ "$MIX_ENV" = 'test' ]
   then
     export PG_LISTENING_ADDRESS="'''"
   fi
 
   initdb --locale=C --encoding=UTF8 --auth-local=peer --auth-host=scram-sha-256 > /dev/null || exit
 
-  # set -m fixes ^C kill postgresql
-  set -m
   # get options for -o from: `postgres --help`
   pg_ctl -l $PGDATA/postgresql.log -o "-k $PGDATA -h $PG_LISTENING_ADDRESS" start || exit
 

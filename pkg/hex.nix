@@ -1,4 +1,4 @@
-{ stdenvNoCC, fetchurl, elixir, LANG }:
+{ stdenvNoCC, elixir }:
 
 stdenvNoCC.mkDerivation rec {
   pname = "hex";
@@ -7,11 +7,10 @@ stdenvNoCC.mkDerivation rec {
   # How to obtain hash:
   # nix-prefetch-url https://repo.hex.pm/installs/<elixir_verion>/hex-<version>.ez
   hash = "sha256:08n51hjjf0b2lrbs48xz21sbda5fsh45c9g9wq0r6lq9qkh3ygb2";
-  src = fetchurl {
+  src = import <nix/fetchurl.nix> {
     url = "https://repo.hex.pm/installs/${elixir_version}/hex-${version}.ez";
     inherit hash;
   };
-  inherit LANG;
   buildInputs = [
     elixir
   ];

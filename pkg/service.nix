@@ -1,7 +1,7 @@
 {config, pkgs, lib, ...}:
 
 let
-  release = (import ../default.nix {}).release;
+  release = (import ../default.nix { }).release;
   release_name = "elixir-app";
   working_directory = "/home/main/app/elixir-app";
 in

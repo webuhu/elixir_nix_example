@@ -11,7 +11,7 @@ stdenvNoCC.mkDerivation rec {
     url = "https://repo.hex.pm/installs/${elixir_version}/hex-${version}.ez";
     inherit hash;
   };
-  buildInputs = [
+  nativeBuildInputs = [
     elixir
   ];
   builder = builtins.toFile "builder.sh" ''

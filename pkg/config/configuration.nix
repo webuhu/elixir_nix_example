@@ -1,6 +1,13 @@
 { config, pkgs, ... }:
 
 {
+  nix = {
+    package = pkgs.nix_2_4;
+    extraOptions = ''
+      experimental-features = nix-command flakes
+    '';
+  };
+
   imports = [
     ./hardware-configuration.nix
     /home/main/app/elixir-app/source/pkg/service.nix
@@ -9,12 +16,12 @@
   # Use the GRUB 2 boot loader.
   boot.loader.grub.enable = true;
   boot.loader.grub.version = 2;
-  boot.loader.grub.devices = [ "/dev/sda" ];
+  boot.loader.grub.device = "/dev/sda";
 
   networking.hostName = "elixir-app-host";
 
   networking.firewall = {
-    allowedTCPPorts = [ 80 443 4080 4443 ];
+    allowedTCPPorts = [ 80 443 ];
   };
 
   networking.useDHCP = false;
@@ -30,21 +37,6 @@
     interface = "ens3";
   };
 
-  # Port forwarding
-  networking.firewall.extraPackages = [ pkgs.iptables ];
-  networking.firewall.extraCommands = ''
-    iptables -t nat -A PREROUTING -i ens3 -p tcp --dport 80 -j REDIRECT --to-ports 4080
-    iptables -t nat -A PREROUTING -i ens3 -p tcp --dport 443 -j REDIRECT --to-ports 4443
-    ip6tables -t nat -A PREROUTING -i ens3 -p tcp --dport 80 -j REDIRECT --to-ports 4080
-    ip6tables -t nat -A PREROUTING -i ens3 -p tcp --dport 443 -j REDIRECT --to-ports 4443
-  '';
-  networking.firewall.extraStopCommands = ''
-    iptables -t nat -D PREROUTING -i ens3 -p tcp --dport 80 -j REDIRECT --to-ports 4080 || true
-    iptables -t nat -D PREROUTING -i ens3 -p tcp --dport 443 -j REDIRECT --to-ports 4443 || true
-    ip6tables -t nat -D PREROUTING -i ens3 -p tcp --dport 80 -j REDIRECT --to-ports 4080 || true
-    ip6tables -t nat -D PREROUTING -i ens3 -p tcp --dport 443 -j REDIRECT --to-ports 4443 || true
-  '';
-
   console.keyMap = "de";
   i18n.defaultLocale = "en_US.UTF-8";
   time.timeZone = "Europe/Amsterdam";
@@ -55,28 +47,46 @@
   ];
 
   # Services
+  services.caddy = {
+    enable = true;
+    email = "me@example.com";
+    config = ''
+      www.example.com {
+        redir https://example.com{uri}
+      }
+      example.com {
+        encode gzip
+        log
+        reverse_proxy localhost:4000
+      }
+    '';
+  };
+
   services.openssh.enable = true;
   services.openssh.passwordAuthentication = false;
   services.openssh.permitRootLogin = "no";
 
   # User accounts. Don't forget to set a password with with passwd
   users.users.main = {
-    uid = 100;
     isNormalUser = true;
     initialPassword = "main";
     extraGroups = [ "wheel" "networkmanager" ];
     openssh.authorizedKeys.keys = [];
   };
 
-  security.sudo.extraConfig = ''
-    main ALL= NOPASSWD: /run/current-system/sw/bin/nixos-rebuild switch
-    main ALL= NOPASSWD: /run/current-system/sw/bin/systemctl * elixir-app
-  '';
+  security.doas = {
+    enable = true;
+    extraConfig = ''
+      permit persist keepenv main
+      permit nopass setenv { NIX_PATH } main cmd nixos-rebuild args switch --impure --relaxed-sandbox
+    '';
+  };
+  security.sudo.enable = false;
 
   # Automatic `nix-collect-garbage -d`
   nix.gc.automatic = true;
   nix.gc.dates = "weekly";
-  nix.gc.options = "--delete-older-than 14d";
+  nix.gc.options = "--delete-older-than 10d";
 
   # QEMU guest agent
   # https://docs.hetzner.com/de/cloud/technical-details/faq/#wie-sind-unsere-system-images-aufgebaut
@@ -85,5 +95,5 @@
   # systemd.services.qemu-guest-agent.path = [ pkgs.shadow ];
 
   # NixOS State Version
-  system.stateVersion = "20.09";
+  system.stateVersion = "21.11";
 }

@@ -10,7 +10,7 @@ stdenvNoCC.mkDerivation rec {
     url = "https://github.com/erlang/rebar3/releases/download/${version}/rebar3";
     inherit hash;
   };
-  buildInputs = [
+  nativeBuildInputs = [
     erlang
   ];
   builder = builtins.toFile "builder.sh" ''

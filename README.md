@@ -78,30 +78,31 @@ mix test
 
 ```sh
 # mix deps
-nix-build -A mix_deps --option sandbox relaxed
+nix build --file default.nix mix_deps --relaxed-sandbox
 
 # JS packages
-nix-build -A node_modules --option sandbox relaxed
+nix build --file default.nix node_modules --relaxed-sandbox
 
 # Compile
-nix-build -A mix_build --option sandbox relaxed
+nix build --file default.nix mix_build --relaxed-sandbox
 
 # Compile cacheable `_build`
 nix develop --command mix compile
 
 # Generate docs using `mix docs`
-nix-build -A docs --option sandbox relaxed
+nix build --file default.nix docs --relaxed-sandbox
 
 # Build production release using `mix release`
-nix-build -A release --argstr MIX_ENV prod --option sandbox relaxed
+nix build --file default.nix release --relaxed-sandbox
 ```
 
 ### Maintenance
 
 ```sh
 # Update pinned Nix pkgs
-# elixir pkg/scripts/pkgs_update.exs
-# TODO: Update flakes instead
+elixir pkg/scripts/pkgs_update.exs
+# Update flake.lock
+nix flake update
 
 # Check / update / clean Mix deps
 mix hex.outdated
@@ -112,6 +113,9 @@ mix deps.clean --unlock --unused
 npm outdated --prefix assets
 npm update --prefix assets
 npm prune --prefix assets
+
+# Flake checks
+nix flake check
 ```
 
 ## [direnv](https://direnv.net/)

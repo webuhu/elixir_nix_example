@@ -1,4 +1,4 @@
-{ stdenvNoCC, lib, elixir, MIX_HOME, MIX_REBAR3, MIX_ENV, LANG, hash ? null }:
+{ stdenvNoCC, lib, elixir, MIX_PATH, MIX_REBAR3, MIX_ENV, LANG, hash ? null }:
 
 stdenvNoCC.mkDerivation rec {
   __noChroot = if hash == null then true else false;
@@ -6,8 +6,8 @@ stdenvNoCC.mkDerivation rec {
   config = ../config;
   mix_exs = ../mix.exs;
   mix_lock = ../mix.lock;
-  inherit MIX_HOME MIX_REBAR3 MIX_ENV LANG;
-  buildInputs = [
+  inherit MIX_PATH MIX_REBAR3 MIX_ENV LANG;
+  nativeBuildInputs = [
     elixir
   ];
   builder = builtins.toFile "builder.sh" ''

@@ -1,4 +1,4 @@
-{ stdenvNoCC, lib, elixir, MIX_HOME, MIX_REBAR3, MIX_ENV, LANG, mix_deps, mix_build, release_name, nodejs, node_modules, hash ? null }:
+{ stdenvNoCC, lib, elixir, MIX_PATH, MIX_REBAR3, MIX_ENV, LANG, mix_deps, mix_build, release_name, nodejs, node_modules, hash ? null }:
 
 stdenvNoCC.mkDerivation rec {
   __noChroot = if hash == null then true else false;
@@ -9,8 +9,8 @@ stdenvNoCC.mkDerivation rec {
   rel = ../rel;
   mix_exs = ../mix.exs;
   mix_lock = ../mix.lock;
-  inherit MIX_ENV MIX_HOME MIX_REBAR3 LANG mix_deps mix_build release_name node_modules;
-  buildInputs = [
+  inherit MIX_ENV MIX_PATH MIX_REBAR3 LANG mix_deps mix_build release_name node_modules;
+  nativeBuildInputs = [
     elixir
     nodejs
   ];

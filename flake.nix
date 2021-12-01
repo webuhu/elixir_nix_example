@@ -12,7 +12,10 @@
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       LANG = "C.UTF-8";
       root = ./.;
-    in {
+
+      postgresql_setup = import ./pkg/temporary_postgresql_db.nix { };
+    in
+    {
       packages.x86_64-linux.erlang = pkgs.beam.interpreters.erlangR24;
       packages.x86_64-linux.elixir = pkgs.beam.packages.erlangR24.elixir_1_12;
       packages.x86_64-linux.nodejs = pkgs.nodejs-17_x;
@@ -31,9 +34,8 @@
 
       defaultPackage.x86_64-linux = self.packages.x86_64-linux.elixir;
 
-      postgresql_setup = import ./pkg/temporary_postgresql_db.nix {};
-
       devShell.x86_64-linux = pkgs.mkShell {
+        inherit LANG;
         # Hex
         MIX_PATH = "${self.packages.x86_64-linux.hex}/archives/hex-${self.packages.x86_64-linux.hex.version}/hex-${self.packages.x86_64-linux.hex.version}/ebin";
         HEX_HOME = ".cache/hex";
@@ -63,12 +65,11 @@
           } ''
           cd ${root}
 
-          nixpkgs-fmt --check *.nix
-          nixpkgs-fmt --check ./pkg/*.nix
+          nixpkgs-fmt *.nix --check
+          nixpkgs-fmt ./pkg/*.nix --check
           touch $out
 
-          # TODO: Not working
-          # export MIX_HOME=.
+          # WIP
           # mix format --check-formatted
         '';
       };

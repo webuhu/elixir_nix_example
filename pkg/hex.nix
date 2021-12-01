@@ -1,4 +1,4 @@
-{ stdenvNoCC, elixir }:
+{ stdenvNoCC, elixir, LANG }:
 
 stdenvNoCC.mkDerivation rec {
   pname = "hex";
@@ -11,6 +11,7 @@ stdenvNoCC.mkDerivation rec {
     url = "https://repo.hex.pm/installs/${elixir_version}/hex-${version}.ez";
     inherit hash;
   };
+  inherit LANG;
   nativeBuildInputs = [
     elixir
   ];

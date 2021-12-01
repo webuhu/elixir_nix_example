@@ -71,7 +71,7 @@
     isNormalUser = true;
     initialPassword = "main";
     extraGroups = [ "wheel" "networkmanager" ];
-    openssh.authorizedKeys.keys = [];
+    openssh.authorizedKeys.keys = [ ];
   };
 
   security.doas = {

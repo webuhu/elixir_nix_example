@@ -13,39 +13,38 @@
       LANG = "C.UTF-8";
       root = ./.;
 
-      postgresql_setup = import ./pkg/temporary_postgresql_db.nix { };
-    in
-    {
-      packages.x86_64-linux.erlang = pkgs.beam.interpreters.erlangR24;
-      packages.x86_64-linux.elixir = pkgs.beam.packages.erlangR24.elixir_1_12;
-      packages.x86_64-linux.nodejs = pkgs.nodejs-17_x;
+      erlang = pkgs.beam.interpreters.erlangR24;
+      elixir = pkgs.beam.packages.erlangR24.elixir_1_13;
+      nodejs = pkgs.nodejs-17_x;
 
       # This is opinionated instead of simple using:
       # pkgs.beam.packages.erlang.hex;
-      packages.x86_64-linux.hex = pkgs.callPackage ./pkg/hex.nix {
-        inherit (self.packages.x86_64-linux.elixir) LANG;
+      hex = pkgs.callPackage ./pkg/hex.nix {
+        inherit elixir LANG;
       };
+      MIX_PATH = "${hex}/archives/hex-${hex.version}/hex-${hex.version}/ebin";
 
       # This is opinionated instead of simple using:
       # pkgs.beam.packages.erlang.rebar3;
-      packages.x86_64-linux.rebar3 = pkgs.callPackage ./pkg/rebar3.nix {
-        inherit (self.packages.x86_64-linux.erlang);
+      rebar3 = pkgs.callPackage ./pkg/rebar3.nix {
+        inherit erlang;
       };
+      MIX_REBAR3 = "${rebar3}/bin/rebar3";
 
-      defaultPackage.x86_64-linux = self.packages.x86_64-linux.elixir;
 
+      postgresql_setup = import ./pkg/temporary_postgresql_db.nix { };
+    in
+    {
       devShell.x86_64-linux = pkgs.mkShell {
-        inherit LANG;
-        # Hex
-        MIX_PATH = "${self.packages.x86_64-linux.hex}/archives/hex-${self.packages.x86_64-linux.hex.version}/hex-${self.packages.x86_64-linux.hex.version}/ebin";
+        inherit LANG MIX_PATH MIX_REBAR3;
+        # use local HOME to avoid global things
+        MIX_HOME = ".cache/mix";
         HEX_HOME = ".cache/hex";
-        # Rebar3
-        MIX_REBAR3 = "${self.packages.x86_64-linux.rebar3}/bin/rebar3";
         # enable IEx shell history
         ERL_AFLAGS = "-kernel shell_history enabled";
         packages = [
-          self.packages.x86_64-linux.elixir
-          self.packages.x86_64-linux.nodejs
+          elixir
+          nodejs
           pkgs.inotify-tools
           pkgs.postgresql_14
           pkgs.nixpkgs-fmt
@@ -56,10 +55,9 @@
       checks.x86_64-linux = {
         format = pkgs.runCommandLocal "check-formatted"
           {
-            inherit LANG;
-            MIX_PATH = "${self.packages.x86_64-linux.hex}/archives/hex-${self.packages.x86_64-linux.hex.version}/hex-${self.packages.x86_64-linux.hex.version}/ebin";
+            inherit LANG MIX_PATH;
             nativeBuildInputs = [
-              self.packages.x86_64-linux.elixir
+              elixir
               pkgs.nixpkgs-fmt
             ];
           } ''
